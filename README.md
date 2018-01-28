@@ -8,6 +8,8 @@ primarily in Go.
 To build the project, run `go build` in your `GOPATH`. It should generate a
 binary called `artifex` that is immediately usable.
 
+You’ll need an installation of SQLite 3.
+
 ## Configure
 
 The binary needs a configuration file to work. By default, artifex searches for
