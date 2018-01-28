@@ -19,7 +19,7 @@ type Artwork struct {
 	Type   string       `json:"type" binding:"required"`
 	URL    string       `json:"url" binding:"required"`
 	Views  int          `json:"views"`
-	Owner  users.User   `json:"owner"` // TODO: set in create artwork
+	Owner  users.User   `json:"owner"`
 	Stars  []users.User `gorm:"many2many:user_languages;" json:"stars"`
 	Public bool         `json:"public" binding:"required"`
 	Price  float64      `json:"price" binding:"required"`
@@ -95,6 +95,12 @@ func CreateArtwork(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
+	claims := jwt.ExtractClaims(c)
+	var user users.User
+	db.Where("username = ?", claims["id"]).First(&user)
+
+	art.Owner = user
+
 	if !db.NewRecord(art) {
 		c.String(http.StatusBadRequest, "Artwork already present: ", string(art.ID))
 		return
@@ -122,6 +128,15 @@ func DeleteArtwork(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
+	claims := jwt.ExtractClaims(c)
+	var user users.User
+	db.Where("username = ?", claims["id"]).First(&user)
+
+	if user != art.Owner {
+		c.String(http.StatusForbidden, "Cannot alter foreign artwork")
+		return
+	}
+
 	db.Delete(art)
 
 	c.String(http.StatusOK, "")
@@ -144,6 +159,15 @@ func UpdateArtwork(c *gin.Context, db *gorm.DB) {
 
 	if db.NewRecord(art) {
 		c.String(http.StatusNotFound, "Not found")
+		return
+	}
+
+	claims := jwt.ExtractClaims(c)
+	var user users.User
+	db.Where("username = ?", claims["id"]).First(&user)
+
+	if user != art.Owner {
+		c.String(http.StatusForbidden, "Cannot alter foreign artwork")
 		return
 	}
 
