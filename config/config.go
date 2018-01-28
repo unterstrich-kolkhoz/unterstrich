@@ -10,9 +10,9 @@ import (
 )
 
 type Config struct {
-	Port string
-  SQLDialect string `toml:"sql_dialect"`
-  SQLName string `toml:"db_name"`
+	Port       string
+	SQLDialect string `toml:"sql_dialect"`
+	SQLName    string `toml:"db_name"`
 }
 
 func ReadConfig(configFile string) (*Config, error) {

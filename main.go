@@ -22,13 +22,13 @@ func main() {
 		log.Fatal("Loading configuration failed: ", err)
 	}
 
-  dbconn, err := db.Create(conf.SQLDialect, conf.SQLName)
-  defer dbconn.Close()
+	dbconn, err := db.Create(conf.SQLDialect, conf.SQLName)
+	defer dbconn.Close()
 
-  if err != nil {
-    log.Fatal("Connecting to database failed: ", err)
-  }
+	if err != nil {
+		log.Fatal("Connecting to database failed: ", err)
+	}
 
-  users.Initialize(dbconn, router)
+	users.Initialize(dbconn, router)
 	log.Fatal(http.ListenAndServe(conf.Port, router))
 }
