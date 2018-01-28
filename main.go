@@ -34,5 +34,5 @@ func main() {
 	authfun := users.InitializeAuth(dbconn, router)
 	users.Initialize(dbconn, router, authfun)
 	artworks.Initialize(dbconn, router, authfun)
-	router.Run()
+	router.Run(conf.Port)
 }

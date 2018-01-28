@@ -1,6 +1,10 @@
 package artworks
 
 import (
+	"bytes"
+	"encoding/json"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -16,13 +20,14 @@ import (
 // Artwork is the artwork model
 type Artwork struct {
 	model.Base
-	Type   string       `json:"type" binding:"required"`
-	URL    string       `json:"url" binding:"required"`
-	Views  int          `json:"views"`
-	Owner  users.User   `json:"owner"`
-	Stars  []users.User `gorm:"many2many:user_languages;" json:"stars"`
-	Public bool         `json:"public" binding:"required"`
-	Price  float64      `json:"price" binding:"required"`
+	Type      string       `json:"type" binding:"required"`
+	URL       string       `json:"url" binding:"required"`
+	Thumbnail string       `json:"thumbnail"`
+	Views     int          `json:"views"`
+	Owner     *users.User  `json:"owner"`
+	Stars     []users.User `gorm:"many2many:user_languages;" json:"stars"`
+	Public    bool         `json:"public"`
+	Price     float64      `json:"price" binding:"required"`
 }
 
 // Initialize installs all endpoints needed for artworks
@@ -67,10 +72,10 @@ func GetArtwork(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	var artwork *Artwork
-	db.First(artwork, id)
+	var artwork Artwork
+	db.First(&artwork, id)
 
-	if artwork == nil {
+	if artwork.ID == 0 {
 		c.String(http.StatusNotFound, "Invalid ID: not found")
 		return
 	}
@@ -79,7 +84,7 @@ func GetArtwork(c *gin.Context, db *gorm.DB) {
 	var user users.User
 	db.Where("username = ?", claims["id"]).First(&user)
 
-	if user.ID != artwork.Owner.ID {
+	if artwork.Owner == nil || user.ID != artwork.Owner.ID {
 		artwork.Views++
 		db.Save(&artwork)
 	}
@@ -99,7 +104,7 @@ func CreateArtwork(c *gin.Context, db *gorm.DB) {
 	var user users.User
 	db.Where("username = ?", claims["id"]).First(&user)
 
-	art.Owner = user
+	art.Owner = &user
 
 	if !db.NewRecord(art) {
 		c.String(http.StatusBadRequest, "Artwork already present: ", string(art.ID))
@@ -107,6 +112,53 @@ func CreateArtwork(c *gin.Context, db *gorm.DB) {
 	}
 
 	db.Create(&art)
+
+	// TODO: make all of this configurable
+	go func() {
+		marshalled, err := json.Marshal(gin.H{
+			"width":       300,
+			"compression": 80,
+			"format":      "png",
+			"url":         art.URL,
+		})
+
+		if err != nil {
+			log.Println("Error while generating thumbnail for artwork ", art.ID,
+				": ", err)
+			return
+		}
+
+		buf := bytes.NewBuffer(marshalled)
+		resp, err := http.Post("http://127.0.0.1:8000/", "application/json", buf)
+
+		if err != nil {
+			log.Println("Error while generating thumbnail for artwork ", art.ID,
+				": ", err)
+			return
+		}
+
+		type Response struct {
+			URL string `json:"url"`
+		}
+
+		var content Response
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Println("Error while generating thumbnail for artwork ", art.ID,
+				": ", err)
+			return
+		}
+
+		err = json.Unmarshal(body, &content)
+		if err != nil {
+			log.Println("Error while generating thumbnail for artwork ", art.ID,
+				": ", err)
+			return
+		}
+
+		art.Thumbnail = content.URL
+		db.Save(&art)
+	}()
 
 	c.JSON(http.StatusOK, art)
 }
