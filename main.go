@@ -20,7 +20,9 @@ func main() {
 		log.Fatal("Loading configuration failed: ", err)
 	}
 
-	router := gin.Default()
+	router := gin.New()
+	router.Use(gin.Logger())
+	router.Use(gin.Recovery())
 	dbconn, err := db.Create(conf.SQLDialect, conf.SQLName)
 	defer dbconn.Close()
 
@@ -28,6 +30,7 @@ func main() {
 		log.Fatal("Connecting to database failed: ", err)
 	}
 
-	users.Initialize(dbconn, router)
+	authfun := users.InitializeAuth(dbconn, router)
+	users.Initialize(dbconn, router, authfun)
 	router.Run()
 }

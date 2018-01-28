@@ -40,12 +40,17 @@ type Social struct {
 	Website string `json:"website"`
 }
 
-func Initialize(db *gorm.DB, router *gin.Engine) {
-	router.GET("/users", endpoint(db, GetUsers))
+func Initialize(db *gorm.DB, router *gin.Engine, auth (func () gin.HandlerFunc)) {
+
 	router.POST("/users", endpoint(db, CreateUser))
-	router.GET("/users/:id", endpoint(db, GetUser))
-	router.PUT("/users/:id", endpoint(db, UpdateUser))
-	router.DELETE("/users/:id", endpoint(db, DeleteUser))
+	g := router.Group("/users")
+	g.Use(auth())
+	{
+		g.GET("/", endpoint(db, GetUsers))
+		g.GET("/:id", endpoint(db, GetUser))
+		g.PUT("/:id", endpoint(db, UpdateUser))
+		g.DELETE("/:id", endpoint(db, DeleteUser))
+	}
 
 	db.AutoMigrate(&User{}, &Address{}, &Social{})
 }
