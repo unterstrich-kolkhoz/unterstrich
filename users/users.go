@@ -43,7 +43,7 @@ type Social struct {
 	Website string `json:"website"`
 }
 
-func Initialize(db *gorm.DB, router *gin.Engine, auth (func () gin.HandlerFunc)) {
+func Initialize(db *gorm.DB, router *gin.Engine, auth func() gin.HandlerFunc) {
 	router.POST("/users", endpoints.Endpoint(db, CreateUser))
 	g := router.Group("/users")
 	g.Use(auth())
@@ -124,7 +124,7 @@ func DeleteUser(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
-  db.Delete(&user)
+	db.Delete(&user)
 
 	c.String(http.StatusOK, "")
 }

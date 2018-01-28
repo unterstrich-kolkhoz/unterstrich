@@ -11,7 +11,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-func InitializeAuth(db *gorm.DB, r *gin.Engine) (func () gin.HandlerFunc) {
+func InitializeAuth(db *gorm.DB, r *gin.Engine) func() gin.HandlerFunc {
 	secret_key := os.Getenv("ARFX_SECRET_KEY")
 
 	if secret_key == "" {

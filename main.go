@@ -6,9 +6,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/hellerve/artifex/artworks"
 	"github.com/hellerve/artifex/config"
 	"github.com/hellerve/artifex/db"
-	"github.com/hellerve/artifex/artworks"
 	"github.com/hellerve/artifex/users"
 )
 
