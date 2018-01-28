@@ -13,25 +13,25 @@ import (
 
 type User struct {
   model.Base
-	Email     string   `json:"email,omitempty"`
-	Password  string   `json:"password,omitempty"`
-	Firstname string   `json:"firstname,omitempty"`
-	Lastname  string   `json:"lastname,omitempty"`
-	Address   *Address `json:"address,omitempty"`
-	Social    *Social  `json:"social,omitempty"`
+	Email     string   `json:"email"`
+	Password  string   `json:"password"`
+	Firstname string   `json:"firstname"`
+	Lastname  string   `json:"lastname"`
+	Address   *Address `json:"address"`
+	Social    *Social  `json:"social"`
 }
 type Address struct {
   model.Base
-	Line1 string `json:"line1,omitempty"`
-	Line2 string `json:"line2,omitempty"`
-	City  string `json:"city,omitempty"`
-	State string `json:"state,omitempty"`
+	Line1 string `json:"line1"`
+	Line2 string `json:"line2"`
+	City  string `json:"city"`
+	State string `json:"state"`
 }
 type Social struct {
   model.Base
-	Github  string `json:"github,omitempty"`
-	Ello    string `json:"ello,omitempty"`
-	Website string `json:"website,omitempty"`
+	Github  string `json:"github"`
+	Ello    string `json:"ello"`
+	Website string `json:"website"`
 }
 
 
@@ -83,7 +83,8 @@ func GetUser(w http.ResponseWriter, r *http.Request, db* gorm.DB) {
 
 func CreateUser(w http.ResponseWriter, r *http.Request, db* gorm.DB) {
 	var user User
-	err := json.NewDecoder(r.Body).Decode(&user)
+  d := json.NewDecoder(r.Body)
+	err := d.Decode(&user)
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -91,6 +92,15 @@ func CreateUser(w http.ResponseWriter, r *http.Request, db* gorm.DB) {
 		w.Write([]byte(err.Error()))
     return
 	}
+
+  if d.More() {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Invalid body: "))
+		var bs []byte
+    d.Buffered().Read(bs)
+    w.Write(bs)
+    return
+  }
 
   if !db.NewRecord(user) {
 		w.WriteHeader(http.StatusBadRequest)
