@@ -31,8 +31,8 @@ the precedence order above.
 ## Develop
 
 We use [pre-commit](https://pre-commit.com/) for development. You’ll have to
-install it and run `pre-commit install`. That—and Go—are the only tools you
-need!
+install it and run `pre-commit install`. This will also require you to install
+`golinter` and `gometalinter`.
 
 ## Test
 

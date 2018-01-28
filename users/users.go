@@ -15,15 +15,15 @@ import (
 
 type User struct {
 	model.Base
-	Email     string   `json:"email"`
-	Password  string   `json:"password"`
+	Email     string   `json:"email" binding:"required"`
+	Password  string   `json:"password" binding:"required"`
 	Firstname string   `json:"firstname"`
 	Lastname  string   `json:"lastname"`
-	Username  string   `json:"username"`
-	artist    bool     `json:"is_artist"`
-	curator   bool     `json:"is_curator"`
-	admin     bool     `json:"is_admin"`
-	staff     bool     `json:"is_staff"`
+	Username  string   `json:"username" binding:"required"`
+	Artist    bool     `json:"is_artist" binding:"required"`
+	Curator   bool     `json:"is_curator" binding:"required"`
+	Admin     bool     `json:"is_admin"`
+	Staff     bool     `json:"is_staff"`
 	Address   *Address `json:"address"`
 	Social    *Social  `json:"social"`
 }
@@ -94,6 +94,11 @@ func CreateUser(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
+	if user.Staff || user.Admin {
+		c.String(http.StatusForbidden, "Cannot create admin user")
+		return
+	}
+
 	pw, err := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
 
 	if err != nil {
@@ -130,7 +135,7 @@ func DeleteUser(c *gin.Context, db *gorm.DB) {
 }
 
 func UpdateUser(c *gin.Context, db *gorm.DB) {
-	_, err := strconv.Atoi(c.Param("id"))
+	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
 		c.String(http.StatusBadRequest, "Invalid ID: must be numerical")
@@ -145,6 +150,14 @@ func UpdateUser(c *gin.Context, db *gorm.DB) {
 
 	if db.NewRecord(user) {
 		c.String(http.StatusNotFound, "Not found")
+		return
+	}
+
+	var other User
+	db.First(other, id)
+
+	if (user.Staff && !other.Staff) || (user.Admin && !other.Admin) {
+		c.String(http.StatusForbidden, "Cannot make user admin")
 		return
 	}
 

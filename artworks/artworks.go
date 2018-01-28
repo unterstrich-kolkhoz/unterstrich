@@ -13,17 +13,19 @@ import (
 	"github.com/hellerve/artifex/users"
 )
 
+// Artwork is the artwork model
 type Artwork struct {
 	model.Base
-	Type   string       `json:"type"`
-	URL    string       `json:"url"`
+	Type   string       `json:"type" binding:"required"`
+	URL    string       `json:"url" binding:"required"`
 	Views  int          `json:"views"`
-	owner  users.User   `json:"stars"`
+	Owner  users.User   `json:"owner"` // TODO: set in create artwork
 	Stars  []users.User `gorm:"many2many:user_languages;" json:"stars"`
-	Public bool         `json:"public"`
-	Price  float64      `json:"price"`
+	Public bool         `json:"public" binding:"required"`
+	Price  float64      `json:"price" binding:"required"`
 }
 
+// Initialize installs all endpoints needed for artworks
 func Initialize(db *gorm.DB, router *gin.Engine, auth func() gin.HandlerFunc) {
 	router.GET("/artworks-public", endpoints.Endpoint(db, PublicArtworks))
 
@@ -42,18 +44,21 @@ func Initialize(db *gorm.DB, router *gin.Engine, auth func() gin.HandlerFunc) {
 	db.AutoMigrate(&Artwork{})
 }
 
+// PublicArtworks gets public artworks
 func PublicArtworks(c *gin.Context, db *gorm.DB) {
 	var artworks []Artwork
 	db.Where("public = ?", true).Find(&artworks)
 	c.JSON(http.StatusOK, artworks)
 }
 
+// GetArtworks gets all artworks
 func GetArtworks(c *gin.Context, db *gorm.DB) {
 	var artworks []Artwork
 	db.Find(&artworks)
 	c.JSON(http.StatusOK, artworks)
 }
 
+// GetArtwork gets all artworks; adds a view if it’s not the owner
 func GetArtwork(c *gin.Context, db *gorm.DB) {
 	id, err := strconv.Atoi(c.Param("id"))
 
@@ -75,13 +80,14 @@ func GetArtwork(c *gin.Context, db *gorm.DB) {
 	db.Where("username = ?", claims["id"]).First(&user)
 
 	if user.ID != artwork.owner.ID {
-		artwork.Views += 1
+		artwork.Views++
 		db.Save(&artwork)
 	}
 
 	c.JSON(http.StatusOK, artwork)
 }
 
+// CreateArtwork creates an artwork
 func CreateArtwork(c *gin.Context, db *gorm.DB) {
 	var art Artwork
 	if err := c.ShouldBindJSON(&art); err != nil {
@@ -99,6 +105,7 @@ func CreateArtwork(c *gin.Context, db *gorm.DB) {
 	c.JSON(http.StatusOK, art)
 }
 
+// DeleteArtwork deletes an artwork
 func DeleteArtwork(c *gin.Context, db *gorm.DB) {
 	id, err := strconv.Atoi(c.Param("id"))
 
@@ -120,6 +127,7 @@ func DeleteArtwork(c *gin.Context, db *gorm.DB) {
 	c.String(http.StatusOK, "")
 }
 
+// UpdateArtwork updates an artwork
 func UpdateArtwork(c *gin.Context, db *gorm.DB) {
 	_, err := strconv.Atoi(c.Param("id"))
 
@@ -144,6 +152,7 @@ func UpdateArtwork(c *gin.Context, db *gorm.DB) {
 	c.JSON(http.StatusOK, art)
 }
 
+// helper function to test whether a username is in a list of users
 func contains(users []users.User, username string) bool {
 	for _, u := range users {
 		if u.Username == username {
@@ -153,6 +162,7 @@ func contains(users []users.User, username string) bool {
 	return false
 }
 
+// StarArtwork stars an artwork (only possible if not already starred)
 func StarArtwork(c *gin.Context, db *gorm.DB) {
 	id, err := strconv.Atoi(c.Param("id"))
 
@@ -184,6 +194,7 @@ func StarArtwork(c *gin.Context, db *gorm.DB) {
 	c.String(http.StatusOK, "")
 }
 
+// UnstarArtwork unstars an artwork (only possible if not currently starred)
 func UnstarArtwork(c *gin.Context, db *gorm.DB) {
 	id, err := strconv.Atoi(c.Param("id"))
 
