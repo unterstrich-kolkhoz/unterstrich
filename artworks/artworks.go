@@ -79,7 +79,7 @@ func GetArtwork(c *gin.Context, db *gorm.DB) {
 	var user users.User
 	db.Where("username = ?", claims["id"]).First(&user)
 
-	if user.ID != artwork.owner.ID {
+	if user.ID != artwork.Owner.ID {
 		artwork.Views++
 		db.Save(&artwork)
 	}
@@ -132,7 +132,7 @@ func DeleteArtwork(c *gin.Context, db *gorm.DB) {
 	var user users.User
 	db.Where("username = ?", claims["id"]).First(&user)
 
-	if user != art.Owner {
+	if user.ID != art.Owner.ID {
 		c.String(http.StatusForbidden, "Cannot alter foreign artwork")
 		return
 	}
@@ -166,7 +166,7 @@ func UpdateArtwork(c *gin.Context, db *gorm.DB) {
 	var user users.User
 	db.Where("username = ?", claims["id"]).First(&user)
 
-	if user != art.Owner {
+	if user.ID != art.Owner.ID {
 		c.String(http.StatusForbidden, "Cannot alter foreign artwork")
 		return
 	}
