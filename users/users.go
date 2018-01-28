@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 
@@ -112,6 +114,16 @@ func CreateUser(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 		w.Write([]byte(string(user.ID)))
 		return
 	}
+
+	pw, err := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
+
+  if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(""))
+		return
+  }
+
+  user.Password = string(pw)
 
 	db.Create(&user)
 
