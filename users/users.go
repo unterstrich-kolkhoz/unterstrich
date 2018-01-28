@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 
+	"github.com/hellerve/artifex/endpoints"
 	"github.com/hellerve/artifex/model"
 )
 
@@ -26,6 +27,7 @@ type User struct {
 	Address   *Address `json:"address"`
 	Social    *Social  `json:"social"`
 }
+
 type Address struct {
 	model.Base
 	Line1 string `json:"line1"`
@@ -33,6 +35,7 @@ type Address struct {
 	City  string `json:"city"`
 	State string `json:"state"`
 }
+
 type Social struct {
 	model.Base
 	Github  string `json:"github"`
@@ -41,24 +44,17 @@ type Social struct {
 }
 
 func Initialize(db *gorm.DB, router *gin.Engine, auth (func () gin.HandlerFunc)) {
-
-	router.POST("/users", endpoint(db, CreateUser))
+	router.POST("/users", endpoints.Endpoint(db, CreateUser))
 	g := router.Group("/users")
 	g.Use(auth())
 	{
-		g.GET("/", endpoint(db, GetUsers))
-		g.GET("/:id", endpoint(db, GetUser))
-		g.PUT("/:id", endpoint(db, UpdateUser))
-		g.DELETE("/:id", endpoint(db, DeleteUser))
+		g.GET("/", endpoints.Endpoint(db, GetUsers))
+		g.GET("/:id", endpoints.Endpoint(db, GetUser))
+		g.PUT("/:id", endpoints.Endpoint(db, UpdateUser))
+		g.DELETE("/:id", endpoints.Endpoint(db, DeleteUser))
 	}
 
 	db.AutoMigrate(&User{}, &Address{}, &Social{})
-}
-
-func endpoint(db *gorm.DB, wrapped func(*gin.Context, *gorm.DB)) func(*gin.Context) {
-	return func(c *gin.Context) {
-		wrapped(c, db)
-	}
 }
 
 func GetUsers(c *gin.Context, db *gorm.DB) {
@@ -127,6 +123,8 @@ func DeleteUser(c *gin.Context, db *gorm.DB) {
 		c.String(http.StatusNotFound, "Not found")
 		return
 	}
+
+  db.Delete(&user)
 
 	c.String(http.StatusOK, "")
 }
