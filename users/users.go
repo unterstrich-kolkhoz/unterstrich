@@ -1,13 +1,12 @@
 package users
 
 import (
-	"encoding/json"
 	"net/http"
 	"strconv"
 
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 
 	"github.com/hellerve/artifex/model"
@@ -41,37 +40,33 @@ type Social struct {
 	Website string `json:"website"`
 }
 
-func Initialize(db *gorm.DB, router *mux.Router) {
-	router.HandleFunc("/users", endpoint(db, GetUsers)).Methods("GET")
-	router.HandleFunc("/users", endpoint(db, CreateUser)).Methods("POST")
-	router.HandleFunc("/users/{id}", endpoint(db, GetUser)).Methods("GET")
-	router.HandleFunc("/users/{id}", endpoint(db, UpdateUser)).Methods("PUT")
-	router.HandleFunc("/users/{id}", endpoint(db, DeleteUser)).Methods("DELETE")
+func Initialize(db *gorm.DB, router *gin.Engine) {
+	router.GET("/users", endpoint(db, GetUsers))
+	router.POST("/users", endpoint(db, CreateUser))
+	router.GET("/users/:id", endpoint(db, GetUser))
+	router.PUT("/users/:id", endpoint(db, UpdateUser))
+	router.DELETE("/users/:id", endpoint(db, DeleteUser))
 
 	db.AutoMigrate(&User{}, &Address{}, &Social{})
 }
 
-func endpoint(db *gorm.DB, wrapped func(http.ResponseWriter,
-	*http.Request, *gorm.DB)) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter,
-		r *http.Request) {
-		wrapped(w, r, db)
+func endpoint(db *gorm.DB, wrapped func(*gin.Context, *gorm.DB)) func(*gin.Context) {
+	return func(c *gin.Context) {
+		wrapped(c, db)
 	}
 }
 
-func GetUsers(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
+func GetUsers(c *gin.Context, db *gorm.DB) {
 	var users []User
 	db.Find(&users)
-	json.NewEncoder(w).Encode(users)
+	c.JSON(http.StatusOK, users)
 }
 
-func GetUser(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
-	params := mux.Vars(r)
-	id, err := strconv.Atoi(params["id"])
+func GetUser(c *gin.Context, db *gorm.DB) {
+	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Invalid ID: must be numerical"))
+		c.String(http.StatusBadRequest, "ID must be numerical: ", err.Error())
 		return
 	}
 
@@ -79,65 +74,44 @@ func GetUser(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 	db.First(user, id)
 
 	if user == nil {
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("Invalid ID: not found"))
+		c.String(http.StatusNotFound, "Invalid ID: not found")
 		return
 	}
 
-	json.NewEncoder(w).Encode(user)
+	c.JSON(http.StatusOK, user)
 }
 
-func CreateUser(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
+func CreateUser(c *gin.Context, db *gorm.DB) {
 	var user User
-	d := json.NewDecoder(r.Body)
-	err := d.Decode(&user)
-
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Invalid body: "))
-		w.Write([]byte(err.Error()))
-		return
-	}
-
-	if d.More() {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Invalid body: "))
-		var bs []byte
-		d.Buffered().Read(bs)
-		w.Write(bs)
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.String(http.StatusBadRequest, "Invalid body: ", err.Error())
 		return
 	}
 
 	if !db.NewRecord(user) {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("User already present: "))
-		w.Write([]byte(string(user.ID)))
+		c.String(http.StatusBadRequest, "User already present: ", string(user.ID))
 		return
 	}
 
 	pw, err := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
 
-  if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(""))
+	if err != nil {
+		c.String(http.StatusInternalServerError, "")
 		return
-  }
+	}
 
-  user.Password = string(pw)
+	user.Password = string(pw)
 
 	db.Create(&user)
 
-	json.NewEncoder(w).Encode(user)
+	c.JSON(http.StatusOK, user)
 }
 
-func DeleteUser(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
-	params := mux.Vars(r)
-
-	id, err := strconv.Atoi(params["id"])
+func DeleteUser(c *gin.Context, db *gorm.DB) {
+	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Invalid ID: must be numerical"))
+		c.String(http.StatusBadRequest, "Invalid ID: must be numerical")
 		return
 	}
 
@@ -145,40 +119,33 @@ func DeleteUser(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 	db.First(user, id)
 
 	if user == nil {
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("Not found"))
+		c.String(http.StatusNotFound, "Not found")
 		return
 	}
 
-	json.NewEncoder(w).Encode("")
+	c.String(http.StatusOK, "")
 }
 
-func UpdateUser(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
-	params := mux.Vars(r)
-
-	_, err := strconv.Atoi(params["id"])
+func UpdateUser(c *gin.Context, db *gorm.DB) {
+	_, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Invalid ID: must be numerical"))
+		c.String(http.StatusBadRequest, "Invalid ID: must be numerical")
+		return
 	}
 
 	var user *User
-	err = json.NewDecoder(r.Body).Decode(user)
-
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Invalid body: "))
-		w.Write([]byte(err.Error()))
+	if err := c.ShouldBindJSON(user); err != nil {
+		c.String(http.StatusBadRequest, "Invalid body: ", err.Error())
+		return
 	}
 
 	if db.NewRecord(user) {
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("Not found"))
+		c.String(http.StatusNotFound, "Not found")
 		return
 	}
 
 	db.Save(&user)
 
-	json.NewEncoder(w).Encode(user)
+	c.JSON(http.StatusOK, user)
 }

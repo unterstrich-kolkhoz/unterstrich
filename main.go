@@ -3,9 +3,8 @@ package main
 import (
 	"flag"
 	"log"
-	"net/http"
 
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 
 	"github.com/hellerve/artifex/config"
 	"github.com/hellerve/artifex/db"
@@ -15,13 +14,13 @@ import (
 func main() {
 	configfile := flag.String("config", "./etc/arfx/server.conf", "Configuration file location")
 	flag.Parse()
-	router := mux.NewRouter()
 	conf, err := config.ReadConfig(*configfile)
 
 	if err != nil {
 		log.Fatal("Loading configuration failed: ", err)
 	}
 
+	router := gin.Default()
 	dbconn, err := db.Create(conf.SQLDialect, conf.SQLName)
 	defer dbconn.Close()
 
@@ -30,5 +29,5 @@ func main() {
 	}
 
 	users.Initialize(dbconn, router)
-	log.Fatal(http.ListenAndServe(conf.Port, router))
+	router.Run()
 }
