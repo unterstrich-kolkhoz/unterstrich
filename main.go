@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/hellerve/artifex/config"
+	"github.com/hellerve/artifex/db"
 	"github.com/hellerve/artifex/users"
 )
 
@@ -16,16 +17,18 @@ func main() {
 	flag.Parse()
 	router := mux.NewRouter()
 	conf, err := config.ReadConfig(*configfile)
-	log.Println(conf.Port)
 
 	if err != nil {
 		log.Fatal("Loading configuration failed: ", err)
 	}
 
-	router.HandleFunc("/users", users.GetUsers).Methods("GET")
-	router.HandleFunc("/users", users.CreateUser).Methods("POST")
-	router.HandleFunc("/users/{id}", users.GetUser).Methods("GET")
-	router.HandleFunc("/users/{id}", users.UpdateUser).Methods("PUT")
-	router.HandleFunc("/users/{id}", users.DeleteUser).Methods("DELETE")
+  dbconn, err := db.Create(conf.SQLDialect, conf.SQLName)
+  defer dbconn.Close()
+
+  if err != nil {
+    log.Fatal("Connecting to database failed: ", err)
+  }
+
+  users.Initialize(dbconn, router)
 	log.Fatal(http.ListenAndServe(conf.Port, router))
 }
