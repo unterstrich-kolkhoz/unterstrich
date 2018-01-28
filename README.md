@@ -28,6 +28,12 @@ The configuration can be in one of four directories, namely:
 It can also be split up, in which case all matching files will be merged, in
 the precedence order above.
 
+## Develop
+
+We use [pre-commit](https://pre-commit.com/) for development. You’ll have to
+install it and run `pre-commit install`. That—and Go—are the only tools you
+need!
+
 ## Test
 
 ## Deploy
