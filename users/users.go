@@ -107,7 +107,7 @@ func CreateUser(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	pw, err := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
+	pw, err := bcrypt.GenerateFromPassword([]byte(user.Password), 12)
 
 	if err != nil {
 		c.String(http.StatusInternalServerError, "")
