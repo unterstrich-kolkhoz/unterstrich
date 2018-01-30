@@ -40,6 +40,12 @@ TODO!
 
 ## Deploy
 
+You’ll have to make sure that the environment variable `ARFX_SECRET_KEY` is set
+to a long, randomly generated string. This is used for JWT token generation,
+and thus secures our sessions. The secret key shouldn’t be changed between
+deployment unless it’s really necessary from a security standpoint, because it
+will validate all tokens otherwise.
+
 TODO!
 
 <hr/>

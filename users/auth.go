@@ -11,16 +11,19 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+// InitializeAuth initializes authentication; it also gets the secret key from
+// an environment variable called `ARFX_SECRET_KEY`. Make sure this variable is
+// set on production.
 func InitializeAuth(db *gorm.DB, r *gin.Engine) func() gin.HandlerFunc {
-	secret_key := os.Getenv("ARFX_SECRET_KEY")
+	secretKey := os.Getenv("ARFX_SECRET_KEY")
 
-	if secret_key == "" {
-		secret_key = "DEBUG"
+	if secretKey == "" {
+		secretKey = "DEBUG"
 	}
 
 	authMiddleware := &jwt.GinJWTMiddleware{
 		Realm:      "user zone",
-		Key:        []byte(secret_key),
+		Key:        []byte(secretKey),
 		Timeout:    time.Hour,
 		MaxRefresh: time.Hour,
 		Authenticator: func(username string, pw string, c *gin.Context) (string, bool) {
