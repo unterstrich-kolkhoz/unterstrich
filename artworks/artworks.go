@@ -92,6 +92,52 @@ func GetArtwork(c *gin.Context, db *gorm.DB) {
 	c.JSON(http.StatusOK, artwork)
 }
 
+func createThumbnail(art Artwork, db *gorm.DB) {
+	marshalled, err := json.Marshal(gin.H{
+		"width":       300,
+		"compression": 80,
+		"format":      "png",
+		"url":         art.URL,
+	})
+
+	if err != nil {
+		log.Println("Error while generating thumbnail for artwork ", art.ID,
+			": ", err)
+		return
+	}
+
+	buf := bytes.NewBuffer(marshalled)
+	resp, err := http.Post("http://127.0.0.1:8000/", "application/json", buf)
+
+	if err != nil {
+		log.Println("Error while generating thumbnail for artwork ", art.ID,
+			": ", err)
+		return
+	}
+
+	type Response struct {
+		URL string `json:"url"`
+	}
+
+	var content Response
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("Error while generating thumbnail for artwork ", art.ID,
+			": ", err)
+		return
+	}
+
+	err = json.Unmarshal(body, &content)
+	if err != nil {
+		log.Println("Error while generating thumbnail for artwork ", art.ID,
+			": ", err)
+		return
+	}
+
+	art.Thumbnail = content.URL
+	db.Save(&art)
+}
+
 // CreateArtwork creates an artwork
 func CreateArtwork(c *gin.Context, db *gorm.DB) {
 	var art Artwork
@@ -113,52 +159,7 @@ func CreateArtwork(c *gin.Context, db *gorm.DB) {
 
 	db.Create(&art)
 
-	// TODO: make all of this configurable
-	go func() {
-		marshalled, err := json.Marshal(gin.H{
-			"width":       300,
-			"compression": 80,
-			"format":      "png",
-			"url":         art.URL,
-		})
-
-		if err != nil {
-			log.Println("Error while generating thumbnail for artwork ", art.ID,
-				": ", err)
-			return
-		}
-
-		buf := bytes.NewBuffer(marshalled)
-		resp, err := http.Post("http://127.0.0.1:8000/", "application/json", buf)
-
-		if err != nil {
-			log.Println("Error while generating thumbnail for artwork ", art.ID,
-				": ", err)
-			return
-		}
-
-		type Response struct {
-			URL string `json:"url"`
-		}
-
-		var content Response
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			log.Println("Error while generating thumbnail for artwork ", art.ID,
-				": ", err)
-			return
-		}
-
-		err = json.Unmarshal(body, &content)
-		if err != nil {
-			log.Println("Error while generating thumbnail for artwork ", art.ID,
-				": ", err)
-			return
-		}
-
-		art.Thumbnail = content.URL
-		db.Save(&art)
-	}()
+	go createThumbnail(art, db)
 
 	c.JSON(http.StatusOK, art)
 }
