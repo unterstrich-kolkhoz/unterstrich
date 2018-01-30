@@ -25,7 +25,9 @@ func main() {
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 	dbconn, err := db.Create(conf.SQLDialect, conf.SQLName)
-	defer dbconn.Close()
+	defer func() {
+		log.Fatal(dbconn.Close())
+	}()
 
 	if err != nil {
 		log.Fatal("Connecting to database failed: ", err)
@@ -34,5 +36,5 @@ func main() {
 	authfun := users.InitializeAuth(dbconn, router)
 	users.Initialize(dbconn, router, authfun)
 	artworks.Initialize(dbconn, router, authfun)
-	router.Run(conf.Port)
+	log.Fatal(router.Run(conf.Port))
 }

@@ -32,7 +32,8 @@ the precedence order above.
 
 We use [pre-commit](https://pre-commit.com/) for development. You’ll have to
 install it and run `pre-commit install`. This will also require you to install
-`golinter` and `gometalinter`.
+`golinter` and `gometalinter`, and the packages our `gometalinter`
+configuration depends on.
 
 ## Test
 
