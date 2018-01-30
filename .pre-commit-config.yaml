@@ -6,4 +6,4 @@
     - id: go-lint
     - id: validate-toml
     - id: no-go-testing
-    #- id: gometalinter disabled for now
+    - id: gometalinter
