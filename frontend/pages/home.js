@@ -1,24 +1,24 @@
-const css = require("sheetify");
 const html = require("choo/html");
 
-const style = css`
-  :host > h1 {
-    color: hotpink;
-  }
-`;
+const style = require("../lib/style");
 
 module.exports = function(state, emit) {
   return html`
     <body class=${style}>
-      <h1>Hello, World!</h1>
-      <p>If you are seeing this, then the generator works!</p>
-      <h2>Demo</h2>
-      <h3>${state.title}</h3>
-      <input type="text" oninput=${update} value=${state.title} />
+      <div class="welcome">
+        <h1><span id="logo">_</span> Unterstrich</h1>
+      </div>
+      <div class="right">
+        <button onclick=${goTo("/login")}>Login</button>
+        <button onclick=${goTo("/signup")}>Sign Up</button>
+      </div>
+      <p>We foster artistic expression.</p>
+      <p>We help you get paid.</p>
+      <p>We make it easy.</p>
     </body>
   `;
 
-  function update(e) {
-    emit("update", { value: e.target.value });
+  function goTo(route) {
+    return () => emit("pushState", route);
   }
 };

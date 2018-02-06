@@ -6,4 +6,7 @@ import "github.com/gin-gonic/gin"
 func Initialize(staticdir string, r *gin.Engine) {
 	r.Static("/static", staticdir)
 	r.StaticFile("/", staticdir+"index.html")
+	r.NoRoute(func(g *gin.Context) {
+		g.File(staticdir + "index.html")
+	})
 }

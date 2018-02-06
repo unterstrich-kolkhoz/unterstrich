@@ -8,11 +8,12 @@
     - id: no-go-testing
     - id: gometalinter
 
-- repo: git://github.com/pre-commit/mirrors-fixmyjs
-  sha: HEAD
-  hooks:
-    - id: fixmyjs
-      exclude: frontend/.generators/*
+# fixmyjs doesn’t work with all lambdas
+#- repo: git://github.com/pre-commit/mirrors-fixmyjs
+#  sha: HEAD
+#  hooks:
+#    - id: fixmyjs
+#      exclude: frontend/.generators/*
 
 - repo: git://github.com/pre-commit/mirrors-jshint
   sha: HEAD
