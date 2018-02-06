@@ -1,12 +1,12 @@
-# artifex
+# unterstrich
 
-artifex is the backend repository of [our product](artifex.io). It is written
+unterstrich is the backend repository of [our product](unterstrich.io). It is written
 primarily in Go and JavaScript.
 
 ## Build
 
 To build the project, run `go build` in your `GOPATH`. It should generate a
-binary called `artifex` that is immediately usable.
+binary called `unterstrich` that is immediately usable.
 
 You’ll need an installation of SQLite 3 to run it.
 
@@ -15,8 +15,8 @@ directory and calling `npm run`.
 
 ## Configure
 
-The binary needs a configuration file to work. By default, artifex searches for
-a file names `./etc/arfx/server.conf`, but this can be changed by supplying the
+The binary needs a configuration file to work. By default, unterstrich searches for
+a file names `./etc/_/server.conf`, but this can be changed by supplying the
 `-config` flag.
 
 The configuration can be in one of four directories, namely:
@@ -48,7 +48,8 @@ TODO!
 
 ## Deploy
 
-You’ll have to make sure that the environment variable `ARFX_SECRET_KEY` is set
+You’ll have to make sure that the environment variable
+`UNTERSTRICH_SECRET_KEY` is set
 to a long, randomly generated string. This is used for JWT token generation,
 and thus secures our sessions. The secret key shouldn’t be changed between
 deployment unless it’s really necessary from a security standpoint, because it

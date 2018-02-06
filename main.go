@@ -6,15 +6,15 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/hellerve/artifex/artworks"
-	"github.com/hellerve/artifex/config"
-	"github.com/hellerve/artifex/db"
-	"github.com/hellerve/artifex/static"
-	"github.com/hellerve/artifex/users"
+	"github.com/hellerve/unterstrich/artworks"
+	"github.com/hellerve/unterstrich/config"
+	"github.com/hellerve/unterstrich/db"
+	"github.com/hellerve/unterstrich/static"
+	"github.com/hellerve/unterstrich/users"
 )
 
 func main() {
-	configfile := flag.String("config", "./etc/arfx/server.conf", "Configuration file location")
+	configfile := flag.String("config", "./etc/_/server.conf", "Configuration file location")
 	flag.Parse()
 	conf, err := config.ReadConfig(*configfile)
 

@@ -10,8 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 
-	"github.com/hellerve/artifex/endpoints"
-	"github.com/hellerve/artifex/model"
+	"github.com/hellerve/unterstrich/endpoints"
+	"github.com/hellerve/unterstrich/model"
 )
 
 // User is the user model
