@@ -22,8 +22,8 @@ type User struct {
 	Firstname string   `json:"firstname"`
 	Lastname  string   `json:"lastname"`
 	Username  string   `json:"username" binding:"required"`
-	Artist    bool     `json:"is_artist" binding:"required"`
-	Curator   bool     `json:"is_curator" binding:"required"`
+	Artist    bool     `json:"is_artist"`
+	Curator   bool     `json:"is_curator"`
 	Admin     bool     `json:"is_admin"`
 	Staff     bool     `json:"is_staff"`
 	Address   *Address `json:"address"`

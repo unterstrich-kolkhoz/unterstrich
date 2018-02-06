@@ -22,7 +22,7 @@ h1 {
   max-width: 200px;
 }
 
-.right button, .login button {
+.right button, .login button, .signup button {
   border: 0;
   background: 0;
   border-bottom: 3px solid #000;
@@ -34,12 +34,16 @@ h1 {
   padding-right: 0;
 }
 
-.login input {
+.login input, .signup input {
   display: block;
   background: 0;
   border: 0;
   border-bottom: 3px solid #000;
   margin-bottom: 1em;
   min-width: 200px;
+  font-size: 20px;
+}
+
+.signup label {
   font-size: 20px;
 }

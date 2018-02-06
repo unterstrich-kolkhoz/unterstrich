@@ -2,8 +2,14 @@ const html = require("choo/html");
 
 const style = require("../lib/style");
 
+const getLocalItem = require("../lib/storage").getLocalItem;
+
 module.exports = function(state, emit) {
-  if (!state.username) emit("pushState", "/");
+  state.username = getLocalItem("username");
+  if (!state.username) {
+    emit("pushState", "/");
+    emit("render");
+  }
 
   return html`
     <body class=${style}>

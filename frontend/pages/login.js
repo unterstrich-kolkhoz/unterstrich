@@ -1,8 +1,8 @@
 /* Page: login */
 
 const html = require("choo/html");
-
 const style = require("../lib/style");
+const setLocalItem = require("../lib/storage").setLocalItem;
 
 function login(state, emit) {
   return html`
@@ -13,27 +13,26 @@ function login(state, emit) {
           Wrong email or password.
         </div>
         <input id="login-username" placeholder="username"
-               value=${state.username} onchange=${updateUser}>
+               value=${state.username}
+               onchange=${update("username")}>
         <input id="login-password" type="password"
                placeholder="password" value=${state.password}
-               onchange=${updatePass} onkeypress=${maybeSubmit}>
+               onchange=${update("password")}
+               onkeypress=${maybeSubmit}>
         <button onclick=${submitLogin}>Login</button>
       </div>
     </body>
   `;
 
-  function updatePass(e) {
-    emit("updatePass", { value: e.target.value });
-  }
-
   function maybeSubmit(e) {
     if (e.keyCode == 13) {
       submitLogin();
     }
+    emit("updateLogin", { key: "password", value: e.target.value });
   }
 
-  function updateUser(e) {
-    emit("updateName", { value: e.target.value });
+  function update(key) {
+    return e => emit("updateLogin", { key, value: e.target.value });
   }
 
   function submitLogin() {
@@ -47,8 +46,10 @@ function login(state, emit) {
       .then(res => {
         if (res.status == 200) {
           res.json().then(json => {
-            emit("updatePass", { value: "" });
-            emit("updateToken", json.token);
+            emit("update", { key: "password", value: "" });
+            emit("update", { key: "token", value: json.token });
+            setLocalItem("username", state.username);
+            setLocalItem("token", json.token);
             emit("pushState", `/${state.username}`);
           });
         } else {
