@@ -1,14 +1,17 @@
 # artifex
 
 artifex is the backend repository of [our product](artifex.io). It is written
-primarily in Go.
+primarily in Go and JavaScript.
 
 ## Build
 
 To build the project, run `go build` in your `GOPATH`. It should generate a
 binary called `artifex` that is immediately usable.
 
-You’ll need an installation of SQLite 3.
+You’ll need an installation of SQLite 3 to run it.
+
+The frontend is built on Choo. You can run it by changing into the `frontend`
+directory and calling `npm run`.
 
 ## Configure
 
@@ -32,8 +35,12 @@ the precedence order above.
 
 We use [pre-commit](https://pre-commit.com/) for development. You’ll have to
 install it and run `pre-commit install`. This will also require you to install
-`golinter` and `gometalinter`, and the packages our `gometalinter`
-configuration depends on.
+the following packages:
+
+- `golinter`
+- `gometalinter`
+- the packages our `gometalinter` configuration depends on
+- `prettier`
 
 ## Test
 
