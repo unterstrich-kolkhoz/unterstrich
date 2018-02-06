@@ -9,14 +9,18 @@ import (
 	"github.com/imdario/mergo"
 )
 
+// Config is our global configuration object
 type Config struct {
 	Port       string
+	Staticdir  string `toml:"static_dir"`
 	SQLDialect string `toml:"sql_dialect"`
 	SQLName    string `toml:"db_name"`
 }
 
+// ReadConfig is the main entry point for configuration
+// parsing
 func ReadConfig(configFile string) (*Config, error) {
-	configFiles := ConfigOptions(configFile)
+	configFiles := configOptions(configFile)
 	config := &Config{}
 	hasConfig := false
 	var confError error
@@ -43,7 +47,7 @@ func ReadConfig(configFile string) (*Config, error) {
 	return config, confError
 }
 
-func ConfigOptions(filename string) []string {
+func configOptions(filename string) []string {
 	return []string{
 		strings.Join([]string{"/", filename}, ""),
 		strings.Join([]string{"./", filename}, ""),

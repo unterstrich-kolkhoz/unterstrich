@@ -1,8 +1,15 @@
+const css = require("sheetify");
 const html = require("choo/html");
+
+const style = css`
+  :host > h1 {
+    color: hotpink;
+  }
+`;
 
 module.exports = function(state, emit) {
   return html`
-    <body>
+    <body class=${style}>
       <h1>Hello, World!</h1>
       <p>If you are seeing this, then the generator works!</p>
       <h2>Demo</h2>

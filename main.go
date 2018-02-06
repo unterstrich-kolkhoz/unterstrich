@@ -9,6 +9,7 @@ import (
 	"github.com/hellerve/artifex/artworks"
 	"github.com/hellerve/artifex/config"
 	"github.com/hellerve/artifex/db"
+	"github.com/hellerve/artifex/static"
 	"github.com/hellerve/artifex/users"
 )
 
@@ -36,5 +37,6 @@ func main() {
 	authfun := users.InitializeAuth(dbconn, router)
 	users.Initialize(dbconn, router, authfun)
 	artworks.Initialize(dbconn, router, authfun)
+	static.Initialize(conf.Staticdir, router)
 	log.Fatal(router.Run(conf.Port))
 }
