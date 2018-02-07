@@ -15,14 +15,15 @@
 #    - id: fixmyjs
 #      exclude: frontend/.generators/*
 
+- repo: git://github.com/awebdeveloper/pre-commit-prettier
+  sha: HEAD
+  hooks:
+    - id: prettier
+      exclude: frontend/.generators/*
+
 - repo: git://github.com/pre-commit/mirrors-jshint
   sha: HEAD
   hooks:
     - id: jshint
       exclude: frontend/.generators/*
 
-- repo: git://github.com/awebdeveloper/pre-commit-prettier
-  sha: HEAD
-  hooks:
-    - id: prettier
-      exclude: frontend/.generators/*
