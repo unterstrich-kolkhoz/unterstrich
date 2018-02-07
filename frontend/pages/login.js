@@ -46,11 +46,11 @@ function login(state, emit) {
       .then(res => {
         if (res.status == 200) {
           res.json().then(json => {
-            emit("update", { key: "password", value: "" });
-            emit("update", { key: "token", value: json.token });
-            setLocalItem("username", state.username);
+            emit("updateLogin", { key: "password", value: "" });
+            emit("updateLogin", { key: "token", value: json.token });
+            setLocalItem("username", state.login.username);
             setLocalItem("token", json.token);
-            emit("pushState", `/${state.username}`);
+            emit("pushState", `/${state.login.username}`);
           });
         } else {
           emit("loginError", res.status);

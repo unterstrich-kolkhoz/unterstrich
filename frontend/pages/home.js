@@ -3,7 +3,6 @@ const html = require("choo/html");
 const style = require("../lib/style");
 
 module.exports = function(state, emit) {
-  console.log(state);
   return html`
     <body class=${style}>
       <div class="welcome">
