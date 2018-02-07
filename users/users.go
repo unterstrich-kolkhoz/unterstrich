@@ -18,16 +18,25 @@ import (
 type User struct {
 	model.Base
 	Email     string   `json:"email" binding:"required"`
-	Password  string   `json:"password" binding:"required"`
+	Password  string   `json:"-"`
 	Firstname string   `json:"firstname"`
 	Lastname  string   `json:"lastname"`
 	Username  string   `json:"username" binding:"required"`
 	Artist    bool     `json:"is_artist"`
 	Curator   bool     `json:"is_curator"`
-	Admin     bool     `json:"is_admin"`
+	Admin     bool     `json:"-"`
 	Staff     bool     `json:"is_staff"`
 	Address   *Address `json:"address"`
 	Social    *Social  `json:"social"`
+}
+
+// CreationUser is a user model on creation
+type CreationUser struct {
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
+	Username string `json:"username" binding:"required"`
+	Artist   bool   `json:"is_artist"`
+	Curator  bool   `json:"is_curator"`
 }
 
 // Address is a user’s address
@@ -57,6 +66,12 @@ func Initialize(db *gorm.DB, router *gin.Engine, auth func() gin.HandlerFunc) {
 		g.GET("/:id", endpoints.Endpoint(db, GetUser))
 		g.PUT("/:id", endpoints.Endpoint(db, UpdateUser))
 		g.DELETE("/:id", endpoints.Endpoint(db, DeleteUser))
+	}
+
+	g = router.Group("/")
+	g.Use(auth())
+	{
+		g.GET("/me", endpoints.Endpoint(db, GetMe))
 	}
 
 	db.AutoMigrate(&User{}, &Address{}, &Social{})
@@ -89,14 +104,29 @@ func GetUser(c *gin.Context, db *gorm.DB) {
 	c.JSON(http.StatusOK, user)
 }
 
+// GetMe gets current user
+func GetMe(c *gin.Context, db *gorm.DB) {
+	claims := jwt.ExtractClaims(c)
+	var me User
+	db.Where("username = ?", claims["id"]).First(&me)
+
+	c.JSON(http.StatusOK, me)
+}
+
 // CreateUser creates a new user
 func CreateUser(c *gin.Context, db *gorm.DB) {
-	var user User
-	if err := c.ShouldBindJSON(&user); err != nil {
+	var jsonuser CreationUser
+	if err := c.ShouldBindJSON(&jsonuser); err != nil {
 		c.String(http.StatusBadRequest, "Invalid body: ", err.Error())
 		return
 	}
 
+	var user User
+	user.Email = jsonuser.Email
+	user.Username = jsonuser.Username
+	user.Password = jsonuser.Password
+	user.Artist = jsonuser.Artist
+	user.Curator = jsonuser.Curator
 	if !db.NewRecord(user) {
 		c.String(http.StatusBadRequest, "User already present: ", string(user.ID))
 		return

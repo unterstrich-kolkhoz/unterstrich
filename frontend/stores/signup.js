@@ -1,15 +1,17 @@
 module.exports = function(state, emitter) {
-  state.loginusername = "";
-  state.loginpassword = "";
-  state.loginis_artist = false;
-  state.loginis_curator = false;
-  state.loginemail = "";
+  state.signup = {
+    username: "",
+    password: "",
+    is_artist: false,
+    is_curator: false,
+    email: ""
+  };
 
   emitter.on("updateSignup", ({ key, value }) => {
-    state[key] = value;
+    state.signup[key] = value;
   });
 
   emitter.on("updateSignupBool", ({ key, value }) => {
-    state[key] = value;
+    state.signup[key] = value;
   });
 };

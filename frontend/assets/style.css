@@ -47,3 +47,10 @@ h1 {
 .signup label {
   font-size: 20px;
 }
+
+.badge {
+  border-radius: 20px;
+  background-color: #000;
+  color: #fefefe;
+  padding: 5px;
+}

@@ -23,8 +23,8 @@ module.exports = function(state, emit) {
   }
 
   function greet() {
-    if (state.username && state.token) {
-      return html`<p>Hello, ${state.username}!</p>`;
+    if (state.login.token) {
+      return html`<p>Hello, ${state.login.username}!</p>`;
     }
     return html`
       <div>

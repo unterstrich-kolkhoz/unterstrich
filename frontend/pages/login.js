@@ -13,12 +13,12 @@ function login(state, emit) {
           Wrong email or password.
         </div>
         <input id="login-username" placeholder="username"
-               value=${state.username}
+               value=${state.login.username}
                onchange=${update("username")}>
         <input id="login-password" type="password"
-               placeholder="password" value=${state.password}
+               placeholder="password" value=${state.login.password}
                onchange=${update("password")}
-               onkeypress=${maybeSubmit}>
+               onkeyup=${maybeSubmit}>
         <button onclick=${submitLogin}>Login</button>
       </div>
     </body>
@@ -39,8 +39,8 @@ function login(state, emit) {
     fetch("/login", {
       method: "POST",
       body: JSON.stringify({
-        username: state.username,
-        password: state.password
+        username: state.login.username,
+        password: state.login.password
       })
     })
       .then(res => {
