@@ -1,10 +1,10 @@
-const getLocalItem = require("../lib/storage").getLocalItem;
+const { getLocal } = require("../lib/storage");
 
 module.exports = function(state, emitter) {
   state.login = {
-    username: "",
+    username: getLocal("username") || "",
     password: "",
-    token: getLocalItem("token") || "",
+    token: getLocal("token") || "",
     has_login_error: false
   };
 
@@ -17,11 +17,7 @@ module.exports = function(state, emitter) {
     emitter.emit("render");
   });
 
-  let username = getLocalItem("username");
-  let token = getLocalItem("token");
-  if (username && token) {
-    state.login.username = username;
-    state.login.token = token;
+  if (state.login.username && state.login.token) {
     emitter.on("DOMContentLoaded", function() {
       emitter.emit("render");
     });

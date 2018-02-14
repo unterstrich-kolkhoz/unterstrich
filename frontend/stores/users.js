@@ -8,7 +8,6 @@ module.exports = function(state, emitter) {
       if (res.status == 200) {
         res.json().then(json => {
           state.userInfo = json;
-          state.login.username = json.username;
           emitter.emit("render");
         });
       }

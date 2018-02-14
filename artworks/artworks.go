@@ -27,7 +27,7 @@ type Artwork struct {
 	Owner     *users.User  `json:"owner"`
 	Stars     []users.User `gorm:"many2many:user_languages;" json:"stars"`
 	Public    bool         `json:"public"`
-	Price     float64      `json:"price" binding:"required"`
+	Price     float64      `json:"price"`
 }
 
 // Initialize installs all endpoints needed for artworks

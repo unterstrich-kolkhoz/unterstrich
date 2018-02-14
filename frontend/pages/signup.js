@@ -5,28 +5,41 @@ const html = require("choo/html");
 const style = require("../lib/style");
 
 function signup(state, emit) {
+  if (state.login.token) {
+    emit("pushState", state.login.username);
+    emit("render");
+  }
+
   return html`
     <body class=${style}>
-      <div class="signup">
-        <h1>signup</h1>
-        <input id="signup-email" placeholder="email"
-               value=${state.signup.email}
-               onchange=${update("email")}>
-        <input id="signup-username" placeholder="username"
-               value=${state.signup.username}
-               onchange=${update("username")}>
-        <input id="signup-password" type="password"
-               placeholder="password" value=${state.signup.password}
-               onchange=${update("password")}>
-        <label for="signup-artist">Artist?</label>
-        <input id="signup-artist" type="checkbox"
-               value=${state.signup.is_artist}
-               onchange=${updateBool("is_artist")}>
-        <label for="signup-curator">Curator?</label>
-        <input id="signup-curator" type="checkbox"
-               value=${state.signup.is_curator}
-               onchange=${updateBool("is_curator")}>
-        <button onclick=${submitSignup}>Sign Up</button>
+      <div class="content">
+        <div class="signup">
+          <h1>signup</h1>
+          <input id="signup-email" placeholder="email"
+                 value=${state.signup.email}
+                 required
+                 onchange=${update("email")}>
+          <input id="signup-username" placeholder="username"
+                 value=${state.signup.username}
+                 required
+                 onchange=${update("username")}>
+          <input id="signup-password" type="password"
+                 placeholder="password" value=${state.signup.password}
+                 required
+                 onchange=${update("password")}>
+          <label for="signup-artist">Artist?</label>
+          <input id="signup-artist" type="checkbox"
+                 value=${state.signup.is_artist}
+                 onchange=${updateBool("is_artist")}>
+          <label for="signup-curator">Curator?</label>
+          <input id="signup-curator" type="checkbox"
+                 value=${state.signup.is_curator}
+                 onchange=${updateBool("is_curator")}>
+          <button type="submit"
+                  onclick=${submitSignup}>
+            Sign Up
+          </button>
+        </div>
       </div>
     </body>
   `;

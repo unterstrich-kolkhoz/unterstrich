@@ -1,11 +1,5 @@
-if (window && window.localStorage) {
-  module.exports = {
-    getLocalItem: localStorage.getItem.bind(localStorage),
-    setLocalItem: localStorage.setItem.bind(localStorage)
-  };
-} else {
-  module.exports = {
-    getLocalItem: function() {},
-    setLocalItem: function() {}
-  };
-}
+module.exports = {
+  getLocal: localStorage.getItem.bind(localStorage),
+  setLocal: localStorage.setItem.bind(localStorage),
+  removeLocal: localStorage.removeItem.bind(localStorage)
+};
