@@ -19,12 +19,13 @@ module.exports = function(state, emit) {
           ${artistBadge()}
           ${curatorBadge()}
           ${social()}
-          ${artworks(state, emit, state.userInfo.username)}
         </div>
         <div class="right">
           <button onclick="${showModal}">
             Add Artwork
           </button>
+        </div>
+        ${artworks(state, emit, state.userInfo.username)}
       </div>
     </body>
   `;

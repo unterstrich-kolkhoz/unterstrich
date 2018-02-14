@@ -16,7 +16,8 @@ module.exports = function(state, emit, username) {
     return html`
       <div class="artwork">
         <a class="img-link" href="/${username}/artworks/${artwork.id}">
-          <img src="${artwork.thumbnail || artwork.url}">
+          <img src="${artwork.thumbnail || artwork.url}"
+               onerror="${e => (e.target.style.display = "none")}">
         </a>
       </div>
     `;

@@ -107,7 +107,15 @@ func createThumbnail(art Artwork, db *gorm.DB) {
 	}
 
 	buf := bytes.NewBuffer(marshalled)
-	resp, err := http.Post("http://127.0.0.1:8000/", "application/json", buf)
+	var resp *http.Response
+	switch art.Type {
+	case "image":
+		resp, err = http.Post("http://127.0.0.1:8000/", "application/json", buf)
+	case "video":
+		resp, err = http.Post("http://127.0.0.1:8001/", "application/json", buf)
+	case "default":
+		return
+	}
 
 	if err != nil {
 		log.Println("Error while generating thumbnail for artwork ", art.ID,

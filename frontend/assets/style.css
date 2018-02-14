@@ -89,3 +89,12 @@ label {
   background: #eff8f8;
   border: 3px solid;
 }
+
+/*.artwork-list {
+  width: calc(80% - 250px);
+}*/
+
+.artwork {
+  display: inline-block;
+  padding: 5px;
+}
