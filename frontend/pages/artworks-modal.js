@@ -5,10 +5,20 @@ module.exports = function(state, emit) {
     return null;
   }
 
+  function progress() {
+    if (!state.artworks.pending) return null;
+
+    return html`
+      <progress value="${100 * state.artworks.progress}" max="100">
+      </progress>
+    `;
+  }
+
   return html`
     <div class="modal" onclick=${disable}>
       <div class="modal-content" onclick=${silence}>
         <h3>Create an artwork</h3>
+        ${progress()}
         <input placeholder="Name"
                value=${state.artworks.new.name}
                onchange=${update("name")}
@@ -29,9 +39,9 @@ module.exports = function(state, emit) {
             Video
           </option>
         </select>
-        <input placeholder="URL"
-               value=${state.artworks.new.url}
-               onchange=${update("url")}
+        <input id="upload-file"
+               type="file"
+               accept="image/*,video/*"
                required>
         <input type="number"
                min="0"
@@ -55,7 +65,7 @@ module.exports = function(state, emit) {
   }
 
   function silence(e) {
-    e.preventDefault();
+    //e.preventDefault();
     e.stopPropagation();
   }
 
@@ -66,6 +76,7 @@ module.exports = function(state, emit) {
   }
 
   function submit() {
-    emit("createArtwork");
+    const file = document.getElementById("upload-file").files[0];
+    emit("createArtwork", { file });
   }
 };

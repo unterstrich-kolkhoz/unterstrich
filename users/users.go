@@ -14,20 +14,36 @@ import (
 	"github.com/hellerve/unterstrich/model"
 )
 
+// Artwork is the artwork model
+type Artwork struct {
+	model.Base
+	Type        string  `json:"type" binding:"required"`
+	URL         string  `json:"url"`
+	Thumbnail   string  `json:"thumbnail"`
+	Name        string  `json:"name" binding:"required"`
+	Description string  `json:"description"`
+	Views       int     `json:"views"`
+	OwnerID     uint    `json:"owner"`
+	Stars       []User  `gorm:"many2many:user_stars;" json:"stars"`
+	Public      bool    `json:"public"`
+	Price       float64 `json:"price"`
+}
+
 // User is the user model
 type User struct {
 	model.Base
-	Email     string   `json:"email" binding:"required"`
-	Password  string   `json:"-"`
-	Firstname string   `json:"firstname"`
-	Lastname  string   `json:"lastname"`
-	Username  string   `json:"username" binding:"required"`
-	Artist    bool     `json:"is_artist"`
-	Curator   bool     `json:"is_curator"`
-	Admin     bool     `json:"-"`
-	Staff     bool     `json:"is_staff"`
-	Address   *Address `json:"address"`
-	Social    *Social  `json:"social"`
+	Email     string    `json:"email" binding:"required"`
+	Password  string    `json:"-"`
+	Firstname string    `json:"firstname"`
+	Lastname  string    `json:"lastname"`
+	Username  string    `json:"username" binding:"required"`
+	Artist    bool      `json:"is_artist"`
+	Curator   bool      `json:"is_curator"`
+	Admin     bool      `json:"-"`
+	Staff     bool      `json:"is_staff"`
+	Address   *Address  `json:"address"`
+	Social    *Social   `json:"social"`
+	Artworks  []Artwork `json:"artworks"`
 }
 
 // CreationUser is a user model on creation
@@ -74,7 +90,7 @@ func Initialize(db *gorm.DB, router *gin.Engine, auth func() gin.HandlerFunc) {
 		g.GET("/me", endpoints.Endpoint(db, GetMe))
 	}
 
-	db.AutoMigrate(&User{}, &Address{}, &Social{})
+	db.AutoMigrate(&User{}, &Address{}, &Social{}, &Artwork{})
 }
 
 // GetUsers gets all users

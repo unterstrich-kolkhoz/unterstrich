@@ -1,4 +1,5 @@
 const authFetch = require("../lib/fetch");
+const authAxios = require("../lib/axios");
 
 module.exports = function(state, emitter) {
   state.artworks = {
@@ -7,10 +8,10 @@ module.exports = function(state, emitter) {
     showModal: false,
     showZoom: false,
     artworks: [],
+    progress: 0.0,
     new: {
       name: "",
       description: "",
-      url: "",
       type: "image",
       price: 0.0
     }
@@ -48,17 +49,34 @@ module.exports = function(state, emitter) {
     state.artworks.new[key] = value;
   });
 
-  emitter.on("createArtwork", () => {
+  function uploadFile(artwork_id, file) {
+    let data = new FormData();
+    data.append("upload", file);
+    authAxios(state, emitter, {
+      method: "post",
+      url: `/artworks/${artwork_id}/upload`,
+      data: data,
+      onUploadProgress: function(e) {
+        state.artworks.progress = e.loaded / e.total;
+        emitter.emit("render");
+      }
+    }).then(res => {
+      if (res.status == 200) emitter.emit("render");
+      state.artworks.showModal = false;
+      state.artworks.user = "";
+      state.artworks.pending = false;
+    });
+  }
+
+  emitter.on("createArtwork", ({ file }) => {
+    state.artworks.pending = true;
     state.artworks.new.price = parseFloat(state.artworks.new.price);
-    console.log(JSON.stringify(state.artworks.new));
     authFetch(state, emitter, "/artworks/", {
       method: "POST",
       body: JSON.stringify(state.artworks.new)
     }).then(res => {
       if (res.status == 200) {
-        state.artworks.showModal = false;
-        state.artworks.user = "";
-        emitter.emit("render");
+        res.json().then(json => uploadFile(json.id, file));
       }
     });
   });

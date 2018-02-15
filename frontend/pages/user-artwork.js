@@ -31,7 +31,6 @@ module.exports = function(state, emit) {
   }
 
   function zoomedInModal() {
-    console.log(state.artworks.showZoom);
     if (!state.artworks.showZoom) return null;
     return html`
       <div class="user-artwork-container-zoomed"
