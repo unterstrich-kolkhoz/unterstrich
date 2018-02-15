@@ -6,9 +6,19 @@ module.exports = function(state, emit) {
   }
 
   return html`
-    <div class="modal">
-      <div class="modal-content">
+    <div class="modal" onclick=${disable}>
+      <div class="modal-content" onclick=${silence}>
         <h3>Create an artwork</h3>
+        <input placeholder="Name"
+               value=${state.artworks.new.name}
+               onchange=${update("name")}
+               required>
+        <textarea onchange=${update("description")}
+                  placehold="description"
+                  rows="4" cols="30"
+                  required>
+          ${state.artworks.new.name}
+        </textarea>
         <select onchange=${update("type")}>
           <option value="image"
                   ${state.artworks.new.type == "image" ? "selected" : ""}>
@@ -33,9 +43,21 @@ module.exports = function(state, emit) {
         <button type="submit" onclick=${submit}>
           Submit
         </button>
+        <button onclick=${disable}>
+          Cancel
+        </button>
       </div>
     </div>
   `;
+
+  function disable() {
+    emit("showArtworkModal", false);
+  }
+
+  function silence(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
 
   function update(key) {
     return e => {

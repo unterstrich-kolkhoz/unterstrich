@@ -14,7 +14,7 @@ module.exports = function(state, emit) {
     <body class=${style}>
       ${modal(state, emit)}
       <div class="content">
-        <div class="welcome">
+        <div class="user-header">
           <h1><span id="logo">_</span> ${state.userInfo.username}</h1>
           ${artistBadge()}
           ${curatorBadge()}
@@ -32,7 +32,6 @@ module.exports = function(state, emit) {
 
   function showModal() {
     emit("showArtworkModal", true);
-    emit("render");
   }
 
   function artistBadge() {

@@ -9,6 +9,7 @@ app.route("/", require("./pages/home"));
 app.route("/login", require("./pages/login"));
 app.route("/signup", require("./pages/signup"));
 app.route("/:username", require("./pages/user"));
+app.route("/a/:username/:id", require("./pages/user-artwork"));
 
 if (module.parent) {
   module.exports = app;

@@ -20,14 +20,16 @@ import (
 // Artwork is the artwork model
 type Artwork struct {
 	model.Base
-	Type      string       `json:"type" binding:"required"`
-	URL       string       `json:"url" binding:"required"`
-	Thumbnail string       `json:"thumbnail"`
-	Views     int          `json:"views"`
-	Owner     *users.User  `json:"owner"`
-	Stars     []users.User `gorm:"many2many:user_languages;" json:"stars"`
-	Public    bool         `json:"public"`
-	Price     float64      `json:"price"`
+	Type        string       `json:"type" binding:"required"`
+	URL         string       `json:"url" binding:"required"`
+	Thumbnail   string       `json:"thumbnail"`
+	Name        string       `json:"name" binding:"required"`
+	Description string       `json:"description"`
+	Views       int          `json:"views"`
+	Owner       *users.User  `json:"owner"`
+	Stars       []users.User `gorm:"many2many:user_languages;" json:"stars"`
+	Public      bool         `json:"public"`
+	Price       float64      `json:"price"`
 }
 
 // Initialize installs all endpoints needed for artworks

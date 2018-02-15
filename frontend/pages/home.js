@@ -1,24 +1,22 @@
 const html = require("choo/html");
 
-const style = require("../lib/style");
+const page = require("../lib/page");
 const { removeLocal } = require("../lib/storage");
 
 module.exports = function(state, emit) {
-  return html`
-    <body class=${style}>
-      <div class="content">
-        <div class="welcome">
-          <h1><span id="logo">_</span> Unterstrich</h1>
-        </div>
-        <div class="right">
-          ${greet()}
-        </div>
-        <p>We foster artistic expression.</p>
-        <p>We help you get paid.</p>
-        <p>We make it easy.</p>
+  return page(html`
+    <div>
+      <div class="welcome">
+        <h1><span id="logo">_</span> Unterstrich</h1>
       </div>
-    </body>
-  `;
+      <div class="right">
+        ${greet()}
+      </div>
+      <p>We foster artistic expression.</p>
+      <p>We help you get paid.</p>
+      <p>We make it easy.</p>
+    </div>
+  `);
 
   function goTo(route) {
     return () => emit("pushState", route);
