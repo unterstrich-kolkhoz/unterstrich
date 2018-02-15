@@ -255,7 +255,6 @@ func processUploadArtwork(file multipart.File, art *users.Artwork, db *gorm.DB) 
 		}
 
 		art.URL = content.URL
-		log.Println(art.Thumbnail)
 		db.Save(art)
 
 		go createThumbnail(art, db)
