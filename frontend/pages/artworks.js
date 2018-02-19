@@ -14,12 +14,19 @@ module.exports = function(state, emit, username) {
   function renderArtwork(artwork) {
     if (!artwork.thumbnail)
       return html`<div class="artwork-placeholder">Thumbnail not yet generated</div>`;
+    console.log(artwork);
     return html`
       <div class="artwork">
         <a class="img-link" href="a/${username}/${artwork.id}">
-          <img src="${artwork.thumbnail}"
-               onerror="${e => (e.target.style.display = "none")}">
+          <img src="${artwork.thumbnail}">
         </a>
+        <p>
+          ${artwork.name}
+          <span class="label">${artwork.views} views</span>
+          <span class="label">${
+            artwork.stars ? artwork.stars.length : 0
+          } stars</span>
+        </p>
       </div>
     `;
   }

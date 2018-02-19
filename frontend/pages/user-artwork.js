@@ -10,6 +10,11 @@ module.exports = function(state, emit) {
     return null;
   }
 
+  if (!state.userInfo) {
+    emit("getUserInfo");
+    return null;
+  }
+
   if (state.artworks.pending) return null;
 
   const artworks = state.artworks.artworks.filter(a => a.id == id);
@@ -30,6 +35,14 @@ module.exports = function(state, emit) {
     emit("showArtworkZoom", false);
   }
 
+  function star() {
+    emit("star", artwork.id);
+  }
+
+  function unstar() {
+    emit("unstar", artwork.id);
+  }
+
   function zoomedInModal() {
     if (!state.artworks.showZoom) return null;
     return html`
@@ -40,6 +53,20 @@ module.exports = function(state, emit) {
     `;
   }
 
+  function starButton() {
+    if (
+      artwork.stars &&
+      artwork.stars.filter(u => u.id == state.userInfo.id).length > 0
+    ) {
+      return html`
+        <button onclick=${unstar}>Unstar</button>
+      `;
+    }
+    return html`
+      <button onclick=${star}>Star</button>
+    `;
+  }
+
   return html`
     <body class="${style}">
       ${zoomedInModal()}
@@ -47,9 +74,18 @@ module.exports = function(state, emit) {
         <div class="user-artwork-container">
           <img src="${artwork.url}" onclick=${showArtworkZoom}>
         </div>
+        <div class="right">
+          ${starButton()}
+        </div>
         <div class="tombstone">
           <h3>
             ${artwork.name} by <a href="/${username}">${username}</a>
+            <div class="right">
+              <span class="label">${artwork.views} views</span>
+              <span class="label">${
+                artwork.stars ? artwork.stars.length : 0
+              } stars</span>
+            </div>
           </h3>
           <p>${artwork.description}</p>
           <p class="artwork-price">Price: $${artwork.price.toFixed(2)}</p>

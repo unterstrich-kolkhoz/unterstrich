@@ -53,14 +53,14 @@ func Initialize(db *gorm.DB, router *gin.Engine, auth func() gin.HandlerFunc) {
 // PublicArtworks gets public artworks
 func PublicArtworks(c *gin.Context, db *gorm.DB) {
 	var artworks []users.Artwork
-	db.Where("public = ?", true).Find(&artworks)
+	db.Where("public = ?", true).Preload("Stars").Find(&artworks)
 	c.JSON(http.StatusOK, artworks)
 }
 
 // GetArtworks gets all artworks
 func GetArtworks(c *gin.Context, db *gorm.DB) {
 	var artworks []users.Artwork
-	db.Find(&artworks)
+	db.Preload("Stars").Find(&artworks)
 	c.JSON(http.StatusOK, artworks)
 }
 
@@ -74,7 +74,7 @@ func GetArtwork(c *gin.Context, db *gorm.DB) {
 	}
 
 	var artwork users.Artwork
-	db.First(&artwork, id)
+	db.Preload("Stars").First(&artwork, id)
 
 	if artwork.ID == 0 {
 		c.String(http.StatusNotFound, "Invalid ID: not found")
@@ -311,7 +311,7 @@ func DeleteArtwork(c *gin.Context, db *gorm.DB) {
 	var art *users.Artwork
 	db.First(art, id)
 
-	if art == nil {
+	if art.ID == 0 {
 		c.String(http.StatusNotFound, "Not found")
 		return
 	}
@@ -383,10 +383,10 @@ func StarArtwork(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	var art *users.Artwork
-	db.First(art, id)
+	var art users.Artwork
+	db.Preload("Stars").First(&art, id)
 
-	if art == nil {
+	if art.ID == 0 {
 		c.String(http.StatusNotFound, "Not found")
 		return
 	}
@@ -415,10 +415,10 @@ func UnstarArtwork(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	var art *users.Artwork
-	db.First(art, id)
+	var art users.Artwork
+	db.Preload("Stars").First(&art, id)
 
-	if art == nil {
+	if art.ID == 0 {
 		c.String(http.StatusNotFound, "Not found")
 		return
 	}
@@ -428,7 +428,7 @@ func UnstarArtwork(c *gin.Context, db *gorm.DB) {
 	db.Where("username = ?", claims["id"]).First(&user)
 
 	if !contains(art.Stars, user.Username) {
-		c.String(http.StatusBadRequest, "Artwork is already starred by you")
+		c.String(http.StatusBadRequest, "Artwork is not starred by you")
 		return
 	}
 
