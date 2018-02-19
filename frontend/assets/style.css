@@ -201,3 +201,12 @@ label {
 progress {
   width: 100%;
 }
+
+.settings-tabs {
+  border-bottom: 3px solid;
+}
+
+.settings-tabs button {
+  display: inline-block;
+  margin-left: 1em;
+}

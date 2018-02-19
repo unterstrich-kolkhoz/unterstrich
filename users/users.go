@@ -18,7 +18,7 @@ import (
 type Artwork struct {
 	model.Base
 	Type        string  `json:"type" binding:"required"`
-	URL         string  `json:"url"`
+	URL         string  `json:"url" gorm:"unique"`
 	Thumbnail   string  `json:"thumbnail"`
 	Name        string  `json:"name" binding:"required"`
 	Description string  `json:"description"`
@@ -32,18 +32,26 @@ type Artwork struct {
 // User is the user model
 type User struct {
 	model.Base
-	Email     string    `json:"email" binding:"required"`
-	Password  string    `json:"-"`
-	Firstname string    `json:"firstname"`
-	Lastname  string    `json:"lastname"`
-	Username  string    `json:"username" binding:"required"`
-	Artist    bool      `json:"is_artist"`
-	Curator   bool      `json:"is_curator"`
-	Admin     bool      `json:"-"`
-	Staff     bool      `json:"is_staff"`
-	Address   *Address  `json:"address"`
-	Social    *Social   `json:"social"`
-	Artworks  []Artwork `json:"artworks"`
+	Email    string    `json:"email" binding:"required"`
+	Password string    `json:"-"`
+	Name     string    `json:"name"`
+	Username string    `json:"username" binding:"required" gorm:"unique"`
+	Artist   bool      `json:"is_artist"`
+	Curator  bool      `json:"is_curator"`
+	Admin    bool      `json:"-"`
+	Staff    bool      `json:"is_staff"`
+	Artworks []Artwork `json:"artworks"`
+
+	Line1   string `json:"line1"`
+	Line2   string `json:"line2"`
+	Zip     string `json:"zip"`
+	City    string `json:"city"`
+	State   string `json:"state"`
+	Country string `json:"country"`
+
+	Github  string `json:"github"`
+	Ello    string `json:"ello"`
+	Website string `json:"website"`
 }
 
 // CreationUser is a user model on creation
@@ -53,23 +61,6 @@ type CreationUser struct {
 	Username string `json:"username" binding:"required"`
 	Artist   bool   `json:"is_artist"`
 	Curator  bool   `json:"is_curator"`
-}
-
-// Address is a user’s address
-type Address struct {
-	model.Base
-	Line1 string `json:"line1"`
-	Line2 string `json:"line2"`
-	City  string `json:"city"`
-	State string `json:"state"`
-}
-
-// Social is a user’s social media accounts
-type Social struct {
-	model.Base
-	Github  string `json:"github"`
-	Ello    string `json:"ello"`
-	Website string `json:"website"`
 }
 
 // Initialize initializes the URLs for users
@@ -90,7 +81,7 @@ func Initialize(db *gorm.DB, router *gin.Engine, auth func() gin.HandlerFunc) {
 		g.GET("/me", endpoints.Endpoint(db, GetMe))
 	}
 
-	db.AutoMigrate(&User{}, &Address{}, &Social{}, &Artwork{})
+	db.AutoMigrate(&User{}, &Artwork{})
 }
 
 // GetUsers gets all users
@@ -207,7 +198,7 @@ func UpdateUser(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	var user *User
+	user := &User{}
 	if err := c.ShouldBindJSON(user); err != nil {
 		c.String(http.StatusBadRequest, "Invalid body: ", err.Error())
 		return
@@ -219,7 +210,7 @@ func UpdateUser(c *gin.Context, db *gorm.DB) {
 	}
 
 	var other User
-	db.First(other, id)
+	db.First(&other, id)
 
 	if (user.Staff && !other.Staff) || (user.Admin && !other.Admin) {
 		c.String(http.StatusForbidden, "Cannot make user admin")

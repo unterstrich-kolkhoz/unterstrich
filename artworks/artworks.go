@@ -21,7 +21,7 @@ import (
 // ArtworkJSON is the JSON artwork model
 type ArtworkJSON struct {
 	Type        string       `json:"type" binding:"required"`
-	URL         string       `json:"url"`
+	URL         string       `json:"url" gorm:"unique"`
 	Thumbnail   string       `json:"thumbnail"`
 	Name        string       `json:"name" binding:"required"`
 	Description string       `json:"description"`

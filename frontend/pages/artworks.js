@@ -14,7 +14,6 @@ module.exports = function(state, emit, username) {
   function renderArtwork(artwork) {
     if (!artwork.thumbnail)
       return html`<div class="artwork-placeholder">Thumbnail not yet generated</div>`;
-    console.log(artwork);
     return html`
       <div class="artwork">
         <a class="img-link" href="a/${username}/${artwork.id}">
