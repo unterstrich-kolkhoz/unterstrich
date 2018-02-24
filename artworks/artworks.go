@@ -94,12 +94,24 @@ func GetArtwork(c *gin.Context, db *gorm.DB) {
 }
 
 func createThumbnail(art *users.Artwork, db *gorm.DB) {
-	marshalled, err := json.Marshal(gin.H{
-		"width":       300,
-		"compression": 80,
-		"format":      "png",
-		"url":         art.URL,
-	})
+	var marshalled []byte
+	var err error
+	switch art.Type {
+	case "image":
+		marshalled, err = json.Marshal(gin.H{
+			"width":       300,
+			"compression": 80,
+			"format":      "png",
+			"url":         art.URL,
+		})
+	case "video":
+		marshalled, err = json.Marshal(gin.H{
+			"width": 300,
+			"url":   art.URL,
+		})
+	default:
+		return
+	}
 
 	if err != nil {
 		log.Println("Error while generating thumbnail for artwork ", art.ID,
@@ -113,7 +125,7 @@ func createThumbnail(art *users.Artwork, db *gorm.DB) {
 	case "image":
 		resp, err = http.Post("http://127.0.0.1:8000/", "application/json", buf)
 	case "video":
-		resp, err = http.Post("http://127.0.0.1:8001/", "application/json", buf)
+		resp, err = http.Post("http://127.0.0.1:8002/", "application/json", buf)
 	case "default":
 		return
 	}
