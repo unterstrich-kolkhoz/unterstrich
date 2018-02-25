@@ -159,7 +159,8 @@ label {
   margin-bottom: 1em;
 }
 
-.user-artwork-container img, .user-artwork-container video {
+.user-artwork-container img, .user-artwork-container video ,
+.user-artwork-container #glsl-container {
   max-width: 100%;
   max-height: calc(100vh - 200px);
   display: block;
@@ -167,7 +168,12 @@ label {
   padding: 1em 0 1em;
 }
 
-.user-artwork-container img:hover, .user-artwork-container video:hover {
+.user-artwork-container #glsl-container {
+  height: calc(100vh - 200px);
+}
+
+.user-artwork-container img:hover, .user-artwork-container video:hover,
+.user-artwork-container #glsl-container:hover {
   cursor: zoom-in;
 }
 

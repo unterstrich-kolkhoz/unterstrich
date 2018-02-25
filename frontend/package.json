@@ -12,7 +12,8 @@
   "license": "MIT",
   "dependencies": {
     "axios": "^0.17.1",
-    "choo": "^6.1.0"
+    "choo": "^6.1.0",
+    "three": "^0.90.0"
   },
   "devDependencies": {
     "bankai": "^9.0.0-rc7",
