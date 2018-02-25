@@ -159,7 +159,7 @@ label {
   margin-bottom: 1em;
 }
 
-.user-artwork-container img {
+.user-artwork-container img, .user-artwork-container video {
   max-width: 100%;
   max-height: calc(100vh - 200px);
   display: block;
@@ -167,7 +167,7 @@ label {
   padding: 1em 0 1em;
 }
 
-.user-artwork-container img:hover {
+.user-artwork-container img:hover, .user-artwork-container video:hover {
   cursor: zoom-in;
 }
 
@@ -180,7 +180,7 @@ label {
   width: 100%;
 }
 
-.user-artwork-container-zoomed img {
+.user-artwork-container-zoomed img, .user-artwork-container-zoomed video {
   position: relative;
   height: 100%;
   margin: 0 auto;

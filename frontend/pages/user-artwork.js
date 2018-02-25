@@ -49,7 +49,7 @@ module.exports = function(state, emit) {
     return html`
       <div class="user-artwork-container-zoomed"
            onclick=${hideArtworkZoom}>
-        <img src="${artwork.url}" onclick=${showArtworkZoom}>
+        ${artworkRender()}
       </div>
     `;
   }
@@ -68,12 +68,27 @@ module.exports = function(state, emit) {
     `;
   }
 
+  function artworkRender(onclick) {
+    switch (artwork.type) {
+      case "image":
+        return html`<img src="${artwork.url}" onclick=${onclick}>`;
+      case "video":
+        return html`<video controls onclick=${onclick}><source src="${
+          artwork.url
+        }"></video>`;
+      case "shader":
+        return null;
+      default:
+        return null;
+    }
+  }
+
   return html`
     <body class="${style}">
       ${zoomedInModal()}
       <div class="user-artwork">
         <div class="user-artwork-container">
-          <img src="${artwork.url}" onclick=${showArtworkZoom}>
+          ${artworkRender(showArtworkZoom)}
         </div>
         <div class="right">
           ${starButton()}
