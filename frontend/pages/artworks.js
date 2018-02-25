@@ -1,6 +1,7 @@
 const html = require("choo/html");
 
 module.exports = function(state, emit, username) {
+  emit("DOMTitleChange", "_ | artworks");
   if (state.artworks.user != username && state.artworks.pending == false) {
     emit("getArtworks", username);
   }

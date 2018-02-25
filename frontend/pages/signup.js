@@ -5,6 +5,7 @@ const html = require("choo/html");
 const page = require("../lib/page");
 
 function signup(state, emit) {
+  emit("DOMTitleChange", "_ | signup");
   if (state.login.token) {
     emit("pushState", state.login.username);
     emit("render");

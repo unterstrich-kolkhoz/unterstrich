@@ -3,6 +3,7 @@ const html = require("choo/html");
 const page = require("../lib/page");
 
 module.exports = function(state, emit) {
+  emit("DOMTitleChange", "_ | settings");
   function tab(name) {
     return () => emit("settingsTab", name);
   }

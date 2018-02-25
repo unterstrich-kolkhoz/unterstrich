@@ -5,6 +5,7 @@ const page = require("../lib/page");
 const { setLocal } = require("../lib/storage");
 
 function login(state, emit) {
+  emit("DOMTitleChange", "_ | login");
   return page(html`
       <div class="login">
         <h1>login</h1>

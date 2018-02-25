@@ -26,6 +26,7 @@ module.exports = function(state, emit) {
   }
 
   const artwork = artworks[0];
+  emit("DOMTitleChange", `_ | ${artwork.name} by ${username}`);
 
   function showArtworkZoom() {
     emit("showArtworkZoom", true);

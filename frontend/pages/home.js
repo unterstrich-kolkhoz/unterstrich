@@ -4,6 +4,7 @@ const page = require("../lib/page");
 const { removeLocal } = require("../lib/storage");
 
 module.exports = function(state, emit) {
+  emit("DOMTitleChange", "_ | home");
   return page(html`
     <div>
       <div class="welcome">

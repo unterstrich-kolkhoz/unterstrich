@@ -14,6 +14,19 @@ module.exports = function(state, emit) {
     `;
   }
 
+  function accept() {
+    switch (state.artworks.new.type) {
+      case "image":
+        return "image/*";
+      case "video":
+        return "video/*";
+      case "shader":
+        return ".glsl,.frag,.vert";
+      default:
+        return "";
+    }
+  }
+
   return html`
     <div class="modal" onclick=${disable}>
       <div class="modal-content" onclick=${silence}>
@@ -29,7 +42,7 @@ module.exports = function(state, emit) {
                   required>
           ${state.artworks.new.name}
         </textarea>
-        <select onchange=${update("type")}>
+        <select onchange=${updateType}>
           <option value="image"
                   ${state.artworks.new.type == "image" ? "selected" : ""}>
             Image
@@ -38,10 +51,14 @@ module.exports = function(state, emit) {
                   ${state.artworks.new.type == "video" ? "selected" : ""}>
             Video
           </option>
+          <option value="shader"
+                  ${state.artworks.new.type == "shader" ? "selected" : ""}>
+            Shader
+          </option>
         </select>
         <input id="upload-file"
                type="file"
-               accept="image/*,video/*"
+               accept=${accept()}
                required>
         <input type="number"
                min="0"
@@ -73,6 +90,11 @@ module.exports = function(state, emit) {
     return e => {
       emit("updateNewArtwork", { key, value: e.target.value });
     };
+  }
+
+  function updateType(e) {
+    update("type")(e);
+    emit("render");
   }
 
   function submit() {

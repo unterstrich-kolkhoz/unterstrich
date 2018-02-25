@@ -9,6 +9,7 @@ module.exports = function(state, emit) {
     emit("getUserInfo");
     return null;
   }
+  emit("DOMTitleChange", `_ | ${state.userInfo.username}`);
 
   return html`
     <body class=${style}>
