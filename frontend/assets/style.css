@@ -186,7 +186,8 @@ label {
   width: 100%;
 }
 
-.user-artwork-container-zoomed img, .user-artwork-container-zoomed video {
+.user-artwork-container-zoomed img, .user-artwork-container-zoomed video,
+.user-artwork-container-zoomed #glsl-container {
   position: relative;
   height: 100%;
   margin: 0 auto;

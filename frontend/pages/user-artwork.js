@@ -1,8 +1,7 @@
 const html = require("choo/html");
 
+const { defaultVertex, defaultFragment, runShader } = require("../lib/shader");
 const style = require("../lib/style");
-
-const THREE = require("three");
 
 module.exports = function(state, emit) {
   const { username, id } = state.params;
@@ -70,81 +69,6 @@ module.exports = function(state, emit) {
     `;
   }
 
-  function runShader(url) {
-    fetch(url, {
-      method: "GET",
-      mode: "cors"
-    })
-      .then(res => {
-        return res.text();
-      })
-      .then(fragment => {
-        let container;
-        let camera, scene, renderer;
-        let uniforms;
-
-        init();
-        animate();
-
-        function init() {
-          container = document.getElementById("glsl-container");
-          container.innerHTML = "";
-
-          camera = new THREE.Camera();
-          camera.position.z = 1;
-
-          scene = new THREE.Scene();
-
-          let geometry = new THREE.PlaneBufferGeometry(2, 2);
-
-          uniforms = {
-            u_time: { type: "f", value: 1.0 },
-            u_resolution: { type: "v2", value: new THREE.Vector2() },
-            u_mouse: { type: "v2", value: new THREE.Vector2() }
-          };
-
-          let material = new THREE.ShaderMaterial({
-            uniforms: uniforms,
-            vertexShader: "void main() {gl_Position = vec4(position, 1.0);}",
-            fragmentShader: fragment
-          });
-
-          let mesh = new THREE.Mesh(geometry, material);
-          scene.add(mesh);
-
-          renderer = new THREE.WebGLRenderer();
-          renderer.setPixelRatio(window.devicePixelRatio);
-
-          container.appendChild(renderer.domElement);
-
-          onWindowResize();
-          window.addEventListener("resize", onWindowResize, false);
-
-          document.onmousemove = function(e) {
-            uniforms.u_mouse.value.x = e.pageX;
-            uniforms.u_mouse.value.y = e.pageY;
-          };
-        }
-
-        function onWindowResize() {
-          const style = getComputedStyle(container);
-          renderer.setSize(parseFloat(style.width), parseFloat(style.height));
-          uniforms.u_resolution.value.x = renderer.domElement.width;
-          uniforms.u_resolution.value.y = renderer.domElement.height;
-        }
-
-        function animate() {
-          requestAnimationFrame(animate);
-          render();
-        }
-
-        function render() {
-          uniforms.u_time.value += 0.05;
-          renderer.render(scene, camera);
-        }
-      });
-  }
-
   function artworkRender(onclick) {
     switch (artwork.type) {
       case "image":
@@ -154,9 +78,22 @@ module.exports = function(state, emit) {
           <video controls onclick=${onclick}>
             <source src="${artwork.url}">
           </video>`;
-      case "shader":
-        runShader(artwork.url);
-        return html`<div id="glsl-container"></div>`;
+      case "fragment-shader":
+        fetch(artwork.url, {
+          method: "GET",
+          mode: "cors"
+        })
+          .then(res => res.text())
+          .then(shader => runShader(defaultVertex, shader));
+        return html`<div id="glsl-container" onclick=${onclick}></div>`;
+      case "vertex-shader":
+        fetch(artwork.url, {
+          method: "GET",
+          mode: "cors"
+        })
+          .then(res => res.text())
+          .then(shader => runShader(shader, defaultFragment));
+        return html`<div id="glsl-container" onclick=${onclick}></div>`;
       default:
         return null;
     }
