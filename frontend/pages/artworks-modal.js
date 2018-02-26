@@ -14,14 +14,18 @@ module.exports = function(state, emit) {
     `;
   }
 
+  const { type } = state.artworks.new;
+
   function accept() {
-    switch (state.artworks.new.type) {
+    switch (type) {
       case "image":
         return "image/*";
       case "video":
         return "video/*";
-      case "shader":
-        return ".glsl,.frag,.vert";
+      case "vertex-shader":
+        return ".glsl,.vert";
+      case "fragment-shader":
+        return ".glsl,.frag";
       default:
         return "";
     }
@@ -44,16 +48,20 @@ module.exports = function(state, emit) {
         </textarea>
         <select onchange=${updateType}>
           <option value="image"
-                  ${state.artworks.new.type == "image" ? "selected" : ""}>
+                  ${type == "image" ? "selected" : ""}>
             Image
           </option>
           <option value="video"
-                  ${state.artworks.new.type == "video" ? "selected" : ""}>
+                  ${type == "video" ? "selected" : ""}>
             Video
           </option>
-          <option value="shader"
-                  ${state.artworks.new.type == "shader" ? "selected" : ""}>
-            Shader
+          <option value="fragment-shader"
+                  ${type == "fragment-shader" ? "selected" : ""}>
+            Fragment Shader
+          </option>
+          <option value="vertex-shader"
+                  ${type == "vertex-shader" ? "selected" : ""}>
+            Vertex Shader
           </option>
         </select>
         <input id="upload-file"
