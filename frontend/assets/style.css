@@ -121,6 +121,24 @@ label {
 
 .artwork img {
   width: 100%;
+  max-height: 250px;
+}
+
+.artwork span {
+  font-size: 18px;
+  margin: 5px;
+  margin-left: 0;
+  text-align: center;
+  display: inline-block;
+}
+
+.artwork .label {
+  margin: 0;
+  margin-left: 2px;
+}
+
+.artwork .label {
+  font-size: 12px;
 }
 
 .artwork-placeholder {

@@ -12,10 +12,10 @@ import (
 )
 
 // InitializeAuth initializes authentication; it also gets the secret key from
-// an environment variable called `ARFX_SECRET_KEY`. Make sure this variable is
+// an environment variable called `UNTERSTRICH_SECRET_KEY`. Make sure this variable is
 // set on production.
 func InitializeAuth(db *gorm.DB, r *gin.Engine) func() gin.HandlerFunc {
-	secretKey := os.Getenv("ARFX_SECRET_KEY")
+	secretKey := os.Getenv("UNTERSTRICH_SECRET_KEY")
 
 	if secretKey == "" {
 		secretKey = "DEBUG"

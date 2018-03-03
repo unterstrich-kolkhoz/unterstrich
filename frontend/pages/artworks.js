@@ -20,13 +20,13 @@ module.exports = function(state, emit, username) {
         <a class="img-link" href="a/${username}/${artwork.id}">
           <img src="${artwork.thumbnail}">
         </a>
-        <p>
-          ${artwork.name}
-          <span class="label">${artwork.views} views</span>
-          <span class="label">${
-            artwork.stars ? artwork.stars.length : 0
-          } stars</span>
-        </p>
+        <span>
+          ${artwork.name.slice(0, 11)}
+        </span>
+        <span class="label">${artwork.views} views</span>
+        <span class="label">
+          ${artwork.stars ? artwork.stars.length : 0} stars
+        </span>
       </div>
     `;
   }
