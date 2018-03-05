@@ -31,20 +31,10 @@ module.exports = function(state, emit) {
                  value=${state.settings.info.email}
                  required
                  onchange=${update("email")}>
-          <input id="settings-firstname"
+          <input id="settings-name"
                  placeholder="Name"
                  value=${state.settings.info.name}
                  onchange=${update("name")}>
-      <label for="settings-artist">Artist?</label>
-      <input id="settings-artist"
-             type="checkbox"
-             ${state.settings.info.is_artist ? "checked" : ""}
-              onchange=${updateBool("is_artist")}>
-      <label for="settings-curator">Curator?</label>
-      <input id="settings-curator"
-             type="checkbox"
-             ${state.settings.info.is_curator ? "checked" : ""}
-             onchange=${updateBool("is_curator")}>
       </div>
     `;
   }

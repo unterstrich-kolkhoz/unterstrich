@@ -80,20 +80,4 @@ module.exports = function(state, emitter) {
       }
     });
   });
-
-  emitter.on("star", id => {
-    authFetch(state, emitter, `/artworks/${id}/star`, {
-      method: "GET"
-    }).then(res => {
-      if (res.status == 200) emitter.emit("getArtworks", state.artworks.user);
-    });
-  });
-
-  emitter.on("unstar", id => {
-    authFetch(state, emitter, `/artworks/${id}/unstar`, {
-      method: "GET"
-    }).then(res => {
-      if (res.status == 200) emitter.emit("getArtworks", state.artworks.user);
-    });
-  });
 };

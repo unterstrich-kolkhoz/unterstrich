@@ -37,14 +37,6 @@ module.exports = function(state, emit) {
     emit("showArtworkZoom", false);
   }
 
-  function star() {
-    emit("star", artwork.id);
-  }
-
-  function unstar() {
-    emit("unstar", artwork.id);
-  }
-
   function zoomedInModal() {
     if (!state.artworks.showZoom) return null;
     return html`
@@ -52,20 +44,6 @@ module.exports = function(state, emit) {
            onclick=${hideArtworkZoom}>
         ${artworkRender()}
       </div>
-    `;
-  }
-
-  function starButton() {
-    if (
-      artwork.stars &&
-      artwork.stars.filter(u => u.id == state.userInfo.id).length > 0
-    ) {
-      return html`
-        <button onclick=${unstar}>Unstar</button>
-      `;
-    }
-    return html`
-      <button onclick=${star}>Star</button>
     `;
   }
 
@@ -105,9 +83,6 @@ module.exports = function(state, emit) {
       <div class="user-artwork">
         <div class="user-artwork-container">
           ${artworkRender(showArtworkZoom)}
-        </div>
-        <div class="right">
-          ${starButton()}
         </div>
         <div class="tombstone">
           <h3>

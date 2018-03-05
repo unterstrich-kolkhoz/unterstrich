@@ -26,14 +26,6 @@ function signup(state, emit) {
              placeholder="password" value=${state.signup.password}
              required
              onchange=${update("password")}>
-      <label for="signup-artist">Artist?</label>
-      <input id="signup-artist" type="checkbox"
-             value=${state.signup.is_artist}
-             onchange=${updateBool("is_artist")}>
-      <label for="signup-curator">Curator?</label>
-      <input id="signup-curator" type="checkbox"
-             value=${state.signup.is_curator}
-             onchange=${updateBool("is_curator")}>
       <button type="submit"
               onclick=${submitSignup}>
         Sign Up

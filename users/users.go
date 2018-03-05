@@ -24,8 +24,6 @@ type Artwork struct {
 	Description string  `json:"description"`
 	Views       int     `json:"views"`
 	OwnerID     uint    `json:"owner"`
-	Stars       []User  `gorm:"many2many:user_stars;" json:"stars"`
-	Public      bool    `json:"public"`
 	Price       float64 `json:"price"`
 }
 
@@ -36,8 +34,6 @@ type User struct {
 	Password string    `json:"-"`
 	Name     string    `json:"name"`
 	Username string    `json:"username" binding:"required" gorm:"unique"`
-	Artist   bool      `json:"is_artist"`
-	Curator  bool      `json:"is_curator"`
 	Admin    bool      `json:"-"`
 	Staff    bool      `json:"is_staff"`
 	Artworks []Artwork `json:"artworks"`
@@ -59,8 +55,6 @@ type CreationUser struct {
 	Email    string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
 	Username string `json:"username" binding:"required"`
-	Artist   bool   `json:"is_artist"`
-	Curator  bool   `json:"is_curator"`
 }
 
 // Initialize initializes the URLs for users

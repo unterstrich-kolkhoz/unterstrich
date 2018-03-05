@@ -2,8 +2,6 @@ module.exports = function(state, emitter) {
   state.signup = {
     username: "",
     password: "",
-    is_artist: false,
-    is_curator: false,
     email: ""
   };
 

@@ -9,8 +9,6 @@ module.exports = function(state, emitter) {
       email: "",
       username: "",
       name: "",
-      is_artist: false,
-      is_curator: false,
 
       line1: "",
       line2: "",
