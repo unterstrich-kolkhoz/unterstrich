@@ -55,7 +55,14 @@ and thus secures our sessions. The secret key shouldn’t be changed between
 deployment unless it’s really necessary from a security standpoint, because it
 will invalidate all tokens otherwise.
 
-TODO!
+### Docker
+
+To build a Docker image, run the following commands:
+
+```
+docker build -t unterstrich .
+docker run -it -p 127.0.0.1:8080:8080 --rm --name unterstrich-web unterstrich
+```
 
 <hr/>
 
