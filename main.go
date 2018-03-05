@@ -10,6 +10,7 @@ import (
 	"github.com/hellerve/unterstrich/config"
 	"github.com/hellerve/unterstrich/db"
 	"github.com/hellerve/unterstrich/static"
+	"github.com/hellerve/unterstrich/subsite"
 	"github.com/hellerve/unterstrich/users"
 )
 
@@ -37,6 +38,7 @@ func main() {
 	authfun := users.InitializeAuth(dbconn, router)
 	artworks.Initialize(dbconn, router, authfun)
 	users.Initialize(dbconn, router, authfun)
+	subsite.Initialize(dbconn, router, authfun)
 	static.Initialize(conf.Staticdir, router)
 	log.Fatal(router.Run(conf.Port))
 }

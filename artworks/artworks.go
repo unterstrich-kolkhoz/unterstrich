@@ -46,8 +46,12 @@ func Initialize(db *gorm.DB, router *gin.Engine, auth func() gin.HandlerFunc) {
 
 // GetArtworks gets all artworks
 func GetArtworks(c *gin.Context, db *gorm.DB) {
+	claims := jwt.ExtractClaims(c)
+	var user users.User
+	db.Where("username = ?", claims["id"]).First(&user)
+
 	var artworks []users.Artwork
-	db.Find(&artworks)
+	db.Model(&user).Related(&artworks)
 	c.JSON(http.StatusOK, artworks)
 }
 
