@@ -64,6 +64,9 @@ docker build -t unterstrich .
 docker run -it -p 127.0.0.1:8080:8080 --rm --name unterstrich-web unterstrich
 ```
 
+*Remember to build the frontend before this, because the compiled JS will be
+copied verbatim into the container!*
+
 <hr/>
 
 Have fun! :heart:
