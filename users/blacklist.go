@@ -2,6 +2,7 @@ package users
 
 // BlacklistedUsernames is a blacklist of usernames that we do not want to have
 // in our system.
+// It is taken from https://github.com/marteinn/The-Big-Username-Blacklist
 var BlacklistedUsernames = []string{
 	"abuse",
 	"admin",
