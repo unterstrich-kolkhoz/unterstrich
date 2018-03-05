@@ -20,22 +20,18 @@ import (
 
 // ArtworkJSON is the JSON artwork model
 type ArtworkJSON struct {
-	Type        string       `json:"type" binding:"required"`
-	URL         string       `json:"url" gorm:"unique"`
-	Thumbnail   string       `json:"thumbnail"`
-	Name        string       `json:"name" binding:"required"`
-	Description string       `json:"description"`
-	Views       int          `json:"views"`
-	Owner       *users.User  `json:"owner"`
-	Stars       []users.User `json:"stars"`
-	Public      bool         `json:"public"`
-	Price       float64      `json:"price"`
+	Type        string      `json:"type" binding:"required"`
+	URL         string      `json:"url" gorm:"unique"`
+	Thumbnail   string      `json:"thumbnail"`
+	Name        string      `json:"name" binding:"required"`
+	Description string      `json:"description"`
+	Views       int         `json:"views"`
+	Owner       *users.User `json:"owner"`
+	Price       float64     `json:"price"`
 }
 
 // Initialize installs all endpoints needed for artworks
 func Initialize(db *gorm.DB, router *gin.Engine, auth func() gin.HandlerFunc) {
-	router.GET("/artworks-public", endpoints.Endpoint(db, PublicArtworks))
-
 	g := router.Group("/artworks")
 	g.Use(auth())
 	{
@@ -44,23 +40,14 @@ func Initialize(db *gorm.DB, router *gin.Engine, auth func() gin.HandlerFunc) {
 		g.GET("/:id", endpoints.Endpoint(db, GetArtwork))
 		g.PUT("/:id", endpoints.Endpoint(db, UpdateArtwork))
 		g.DELETE("/:id", endpoints.Endpoint(db, DeleteArtwork))
-		g.GET("/:id/star", endpoints.Endpoint(db, StarArtwork))
-		g.GET("/:id/unstar", endpoints.Endpoint(db, UnstarArtwork))
 		g.POST("/:id/upload", endpoints.Endpoint(db, UploadArtwork))
 	}
-}
-
-// PublicArtworks gets public artworks
-func PublicArtworks(c *gin.Context, db *gorm.DB) {
-	var artworks []users.Artwork
-	db.Where("public = ?", true).Preload("Stars").Find(&artworks)
-	c.JSON(http.StatusOK, artworks)
 }
 
 // GetArtworks gets all artworks
 func GetArtworks(c *gin.Context, db *gorm.DB) {
 	var artworks []users.Artwork
-	db.Preload("Stars").Find(&artworks)
+	db.Find(&artworks)
 	c.JSON(http.StatusOK, artworks)
 }
 
@@ -74,7 +61,7 @@ func GetArtwork(c *gin.Context, db *gorm.DB) {
 	}
 
 	var artwork users.Artwork
-	db.Preload("Stars").First(&artwork, id)
+	db.First(&artwork, id)
 
 	if artwork.ID == 0 {
 		c.String(http.StatusNotFound, "Invalid ID: not found")
@@ -172,7 +159,6 @@ func CreateArtwork(c *gin.Context, db *gorm.DB) {
 	art.Type = artjson.Type
 	art.Name = artjson.Name
 	art.Description = artjson.Description
-	art.Public = artjson.Public
 	art.Price = artjson.Price
 
 	claims := jwt.ExtractClaims(c)
@@ -374,78 +360,4 @@ func UpdateArtwork(c *gin.Context, db *gorm.DB) {
 	db.Save(&art)
 
 	c.JSON(http.StatusOK, art)
-}
-
-// helper function to test whether a username is in a list of users
-func contains(users []users.User, username string) bool {
-	for _, u := range users {
-		if u.Username == username {
-			return true
-		}
-	}
-	return false
-}
-
-// StarArtwork stars an artwork (only possible if not already starred)
-func StarArtwork(c *gin.Context, db *gorm.DB) {
-	id, err := strconv.Atoi(c.Param("id"))
-
-	if err != nil {
-		c.String(http.StatusBadRequest, "Invalid ID: must be numerical")
-		return
-	}
-
-	var art users.Artwork
-	db.Preload("Stars").First(&art, id)
-
-	if art.ID == 0 {
-		c.String(http.StatusNotFound, "Not found")
-		return
-	}
-
-	claims := jwt.ExtractClaims(c)
-	var user users.User
-	db.Where("username = ?", claims["id"]).First(&user)
-
-	if contains(art.Stars, user.Username) {
-		c.String(http.StatusBadRequest, "Artwork is already starred by you")
-		return
-	}
-
-	db.Model(&art).Association("Stars").Append(user)
-	db.Save(&art)
-
-	c.String(http.StatusOK, "")
-}
-
-// UnstarArtwork unstars an artwork (only possible if not currently starred)
-func UnstarArtwork(c *gin.Context, db *gorm.DB) {
-	id, err := strconv.Atoi(c.Param("id"))
-
-	if err != nil {
-		c.String(http.StatusBadRequest, "Invalid ID: must be numerical")
-		return
-	}
-
-	var art users.Artwork
-	db.Preload("Stars").First(&art, id)
-
-	if art.ID == 0 {
-		c.String(http.StatusNotFound, "Not found")
-		return
-	}
-
-	claims := jwt.ExtractClaims(c)
-	var user users.User
-	db.Where("username = ?", claims["id"]).First(&user)
-
-	if !contains(art.Stars, user.Username) {
-		c.String(http.StatusBadRequest, "Artwork is not starred by you")
-		return
-	}
-
-	db.Model(&art).Association("Stars").Delete(user)
-	db.Save(&art)
-
-	c.String(http.StatusOK, "")
 }

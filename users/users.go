@@ -115,6 +115,15 @@ func GetMe(c *gin.Context, db *gorm.DB) {
 	c.JSON(http.StatusOK, me)
 }
 
+func inBlacklist(username string) bool {
+	for _, blacklisted := range BlacklistedUsernames {
+		if blacklisted == username {
+			return true
+		}
+	}
+	return false
+}
+
 // CreateUser creates a new user
 func CreateUser(c *gin.Context, db *gorm.DB) {
 	var jsonuser CreationUser
@@ -124,11 +133,15 @@ func CreateUser(c *gin.Context, db *gorm.DB) {
 	}
 
 	var user User
+
+	if inBlacklist(jsonuser.Username) {
+		c.String(http.StatusBadRequest, "Username in blacklist: ", jsonuser.Username)
+		return
+	}
+
 	user.Email = jsonuser.Email
 	user.Username = jsonuser.Username
 	user.Password = jsonuser.Password
-	user.Artist = jsonuser.Artist
-	user.Curator = jsonuser.Curator
 	if !db.NewRecord(user) {
 		c.String(http.StatusBadRequest, "User already present: ", string(user.ID))
 		return
