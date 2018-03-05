@@ -1,10 +1,13 @@
 package subsite
 
 import (
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/appleboy/gin-jwt"
 	"github.com/gin-gonic/gin"
+	"github.com/hoisie/mustache"
 	"github.com/jinzhu/gorm"
 
 	"github.com/hellerve/unterstrich/endpoints"
@@ -25,7 +28,19 @@ func processUpdate(db *gorm.DB, username string) {
 	db.Where("username = ?", username).First(&user)
 
 	var artworks []users.Artwork
-	db.Model(&user).Where("selected = true").Related(&artworks)
+	db.Model(&user).Where("selected = ?", true).Related(&artworks)
+	data := mustache.RenderFile("./templates/subsite.html", map[string]interface{}{"user": user, "artworks": artworks})
+
+	f, err := os.Create("rendered/" + username + ".html")
+	if err != nil {
+		log.Println("Error during subsite creation: ", err)
+	}
+	defer f.Close()
+
+	_, err = f.Write([]byte(data))
+	if err != nil {
+		log.Println("Error during subsite creation: ", err)
+	}
 }
 
 // UpdateSubsite updates the user subsite

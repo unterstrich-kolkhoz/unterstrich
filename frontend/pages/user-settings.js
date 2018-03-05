@@ -4,6 +4,8 @@ const page = require("../lib/page");
 
 module.exports = function(state, emit) {
   emit("DOMTitleChange", "_ | settings");
+  if (!state.settings.info.id) emit("fetchSettings");
+
   function tab(name) {
     return () => emit("settingsTab", name);
   }

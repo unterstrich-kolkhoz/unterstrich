@@ -8,6 +8,7 @@ import (
 
 	"github.com/appleboy/gin-jwt"
 	"github.com/gin-gonic/gin"
+	"github.com/gosimple/slug"
 	"github.com/jinzhu/gorm"
 
 	"github.com/hellerve/unterstrich/endpoints"
@@ -23,7 +24,7 @@ type Artwork struct {
 	Name        string  `json:"name" binding:"required"`
 	Description string  `json:"description"`
 	Views       int     `json:"views"`
-	OwnerID     uint    `json:"owner"`
+	UserID      uint    `json:"owner"`
 	Price       float64 `json:"price"`
 	Selected    bool    `json:"selected"`
 }
@@ -237,4 +238,9 @@ func UpdateUser(c *gin.Context, db *gorm.DB) {
 	db.Save(&user)
 
 	c.JSON(http.StatusOK, user)
+}
+
+// Slug generates a slug from the artwork name
+func (a Artwork) Slug() string {
+	return slug.Make(a.Name)
 }

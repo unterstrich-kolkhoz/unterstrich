@@ -26,7 +26,7 @@ type ArtworkJSON struct {
 	Name        string      `json:"name" binding:"required"`
 	Description string      `json:"description"`
 	Views       int         `json:"views"`
-	Owner       *users.User `json:"owner"`
+	UserID      *users.User `json:"owner"`
 	Price       float64     `json:"price"`
 }
 
@@ -76,7 +76,7 @@ func GetArtwork(c *gin.Context, db *gorm.DB) {
 	var user users.User
 	db.Where("username = ?", claims["id"]).First(&user)
 
-	if user.ID != artwork.OwnerID {
+	if user.ID != artwork.UserID {
 		artwork.Views++
 		db.Save(&artwork)
 	}
@@ -174,7 +174,7 @@ func CreateArtwork(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	art.OwnerID = user.ID
+	art.UserID = user.ID
 
 	if !db.NewRecord(art) {
 		c.String(http.StatusBadRequest, "Artwork already present: ", string(art.ID))
@@ -284,7 +284,7 @@ func UploadArtwork(c *gin.Context, db *gorm.DB) {
 	var user users.User
 	db.Where("username = ?", claims["id"]).First(&user)
 
-	if user.ID != art.OwnerID {
+	if user.ID != art.UserID {
 		c.String(http.StatusForbidden, "Cannot alter foreign artwork")
 		return
 	}
@@ -322,7 +322,7 @@ func DeleteArtwork(c *gin.Context, db *gorm.DB) {
 	var user users.User
 	db.Where("username = ?", claims["id"]).First(&user)
 
-	if user.ID != art.OwnerID {
+	if user.ID != art.UserID {
 		c.String(http.StatusForbidden, "Cannot alter foreign artwork")
 		return
 	}
@@ -356,7 +356,7 @@ func UpdateArtwork(c *gin.Context, db *gorm.DB) {
 	var user users.User
 	db.Where("username = ?", claims["id"]).First(&user)
 
-	if user.ID != art.OwnerID {
+	if user.ID != art.UserID {
 		c.String(http.StatusForbidden, "Cannot alter foreign artwork")
 		return
 	}

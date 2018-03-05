@@ -60,6 +60,4 @@ module.exports = function(state, emitter) {
   emitter.on("updateSettings", ({ key, value }) => {
     state.settings.info[key] = value;
   });
-
-  emitter.emit("fetchSettings");
 };

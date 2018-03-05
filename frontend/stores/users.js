@@ -13,4 +13,12 @@ module.exports = function(state, emitter) {
       }
     });
   });
+
+  emitter.on("generatePortfolio", () => {
+    authFetch(state, emitter, "/subsite/", {
+      method: "POST"
+    }).then(res => {
+      // TODO
+    });
+  });
 };

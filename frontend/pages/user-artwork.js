@@ -89,9 +89,6 @@ module.exports = function(state, emit) {
             ${artwork.name} by <a href="/${username}">${username}</a>
             <div class="right">
               <span class="label">${artwork.views} views</span>
-              <span class="label">${
-                artwork.stars ? artwork.stars.length : 0
-              } stars</span>
             </div>
           </h3>
           <p>${artwork.description}</p>

@@ -26,6 +26,9 @@ module.exports = function(state, emit) {
           <button onclick="${showModal}">
             Add Artwork
           </button>
+          <button onclick="${generatePage}">
+            Generate Portfolio
+          </button>
           ${settingsPage()}
         </div>
         ${artworks(state, emit, state.userInfo.username)}
@@ -35,6 +38,10 @@ module.exports = function(state, emit) {
 
   function showModal() {
     emit("showArtworkModal", true);
+  }
+
+  function generatePage() {
+    emit("generatePortfolio", true);
   }
 
   function settingsPage() {
