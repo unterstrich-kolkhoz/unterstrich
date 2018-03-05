@@ -25,6 +25,7 @@ type Artwork struct {
 	Views       int     `json:"views"`
 	OwnerID     uint    `json:"owner"`
 	Price       float64 `json:"price"`
+	Selected    bool    `json:"selected"`
 }
 
 // User is the user model
