@@ -58,6 +58,23 @@ func processUpdate(db *gorm.DB, username string) {
 		log.Println("Error during subsite creation: ", err)
 		return
 	}
+
+	for _, artwork := range artworks {
+		data = mustache.RenderFile("./templates/subsite_artwork.html", map[string]interface{}{"user": user, "artwork": artwork})
+
+		f, err = os.Create("rendered/" + artwork.Slug() + ".html")
+		if err != nil {
+			log.Println("Error during subsite creation: ", err)
+			return
+		}
+		defer f.Close()
+
+		_, err = f.Write([]byte(data))
+		if err != nil {
+			log.Println("Error during subsite creation: ", err)
+			return
+		}
+	}
 }
 
 // UpdateSubsite updates the user subsite
