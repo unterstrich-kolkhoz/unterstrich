@@ -34,12 +34,29 @@ func processUpdate(db *gorm.DB, username string) {
 	f, err := os.Create("rendered/" + username + ".html")
 	if err != nil {
 		log.Println("Error during subsite creation: ", err)
+		return
 	}
 	defer f.Close()
 
 	_, err = f.Write([]byte(data))
 	if err != nil {
 		log.Println("Error during subsite creation: ", err)
+		return
+	}
+
+	data = mustache.RenderFile("./templates/subsite_about.html", map[string]interface{}{"user": user})
+
+	f, err = os.Create("rendered/" + username + "_about.html")
+	if err != nil {
+		log.Println("Error during subsite creation: ", err)
+		return
+	}
+	defer f.Close()
+
+	_, err = f.Write([]byte(data))
+	if err != nil {
+		log.Println("Error during subsite creation: ", err)
+		return
 	}
 }
 

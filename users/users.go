@@ -235,6 +235,19 @@ func UpdateUser(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
+	if len(user.Password) == 0 {
+		user.Password = me.Password
+	} else {
+		pw, err := bcrypt.GenerateFromPassword([]byte(user.Password), 12)
+
+		if err != nil {
+			c.String(http.StatusInternalServerError, "")
+			return
+		}
+
+		user.Password = string(pw)
+	}
+
 	db.Save(&user)
 
 	c.JSON(http.StatusOK, user)
@@ -243,4 +256,14 @@ func UpdateUser(c *gin.Context, db *gorm.DB) {
 // Slug generates a slug from the artwork name
 func (a Artwork) Slug() string {
 	return slug.Make(a.Name)
+}
+
+// HasAddress checks whether a user has an address
+func (u User) HasAddress() bool {
+	return u.Line1 != ""
+}
+
+// HasState checks whether a user address contains a state
+func (u User) HasState() bool {
+	return u.State != ""
 }
