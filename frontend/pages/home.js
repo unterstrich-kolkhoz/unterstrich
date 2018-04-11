@@ -16,6 +16,10 @@ module.exports = function(state, emit) {
       <p>We foster artistic expression.</p>
       <p>We help you get paid.</p>
       <p>We make it easy.</p>
+      <p>
+        We are also <a href="https://github.com/unterstrich-kolkhoz">completely
+        open source</a>, if that’s your thing.
+      </p>
     </div>
   `);
 

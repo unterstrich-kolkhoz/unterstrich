@@ -21,7 +21,7 @@ module.exports = function(state, emit, username) {
           <img src="${artwork.thumbnail}">
         </a>
         <span>
-          ${artwork.name.slice(0, 16)}
+          ${artwork.name}
         </span>
         <span class="label">${artwork.views} views</span>
       </div>

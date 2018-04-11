@@ -1,7 +1,12 @@
 # unterstrich
 
-unterstrich is the backend repository of [our product](unterstrich.io). It is written
-primarily in Go and JavaScript.
+unterstrich is the backend repository of the eponymous artist platform. It is
+written primarily in Go and JavaScript.
+
+**Disclaimer:** This is a heavy work in progress, and you probably don’t want
+to look at it yet. There’s a bunch of icky hardcoded stuff in there and such,
+and we want to spare you. That said, if you want to know what this might become,
+get in touch!
 
 ## Build
 

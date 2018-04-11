@@ -1,5 +1,5 @@
 body {
-  background: #eff8f8;
+  background: #fefefe;
   font-family: monospace;
   margin: 0;
 }
@@ -40,7 +40,7 @@ a {
 
 .right {
   float: right;
-  max-width: 200px;
+  width: 260px;
 }
 
 .user-header {
@@ -66,7 +66,9 @@ input, select, textarea {
   border: 0;
   border-bottom: 3px solid #000;
   margin-bottom: 1em;
-  min-width: 200px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 90%;
   font-size: 20px;
 }
 
@@ -98,21 +100,17 @@ label {
 
 .modal-content {
   margin: auto;
-  max-width: 400px;
+  max-width: 800px;
   padding: 3em;
   position: relative;
   margin-top: 5%;
-  background: #eff8f8;
+  background: #fefefe;
   border: 3px solid;
 }
 
-/*.artwork-list {
-  width: calc(80% - 250px);
-}*/
-
 .artwork {
   display: inline-block;
-  height: 300px;
+  min-height: 300px;
   width: 250px;
   padding: 5px;
   padding-top: 0;
@@ -129,16 +127,12 @@ label {
   margin: 5px;
   margin-left: 0;
   text-align: center;
-  display: inline-block;
-}
-
-.artwork .label {
-  margin: 0;
-  margin-left: 2px;
+  display: block;
 }
 
 .artwork .label {
   font-size: 12px;
+  display: inline-block;
 }
 
 .artwork-placeholder {

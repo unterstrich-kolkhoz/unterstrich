@@ -42,7 +42,7 @@ module.exports = function(state, emit) {
                required>
         <textarea onchange=${update("description")}
                   placehold="description"
-                  rows="4" cols="30"
+                  rows="4" cols="80"
                   required>
           ${state.artworks.new.name}
         </textarea>
