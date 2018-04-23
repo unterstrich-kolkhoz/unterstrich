@@ -9,6 +9,7 @@ import (
 	"github.com/hellerve/unterstrich/artworks"
 	"github.com/hellerve/unterstrich/config"
 	"github.com/hellerve/unterstrich/db"
+	"github.com/hellerve/unterstrich/endpoints"
 	"github.com/hellerve/unterstrich/static"
 	"github.com/hellerve/unterstrich/subsite"
 	"github.com/hellerve/unterstrich/users"
@@ -35,10 +36,12 @@ func main() {
 		log.Fatal("Connecting to database failed: ", err)
 	}
 
+	context := endpoints.Context{dbconn, conf}
+
 	authfun := users.InitializeAuth(dbconn, router)
-	artworks.Initialize(dbconn, router, authfun)
-	users.Initialize(dbconn, router, authfun)
-	subsite.Initialize(dbconn, router, authfun)
+	artworks.Initialize(&context, router, authfun)
+	users.Initialize(&context, router, authfun)
+	subsite.Initialize(&context, router, authfun)
 	static.Initialize(conf.Staticdir, router)
 	log.Fatal(router.Run(conf.Port))
 }

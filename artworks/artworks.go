@@ -12,7 +12,6 @@ import (
 
 	"github.com/appleboy/gin-jwt"
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 
 	"github.com/hellerve/unterstrich/endpoints"
 	"github.com/hellerve/unterstrich/users"
@@ -31,32 +30,32 @@ type ArtworkJSON struct {
 }
 
 // Initialize installs all endpoints needed for artworks
-func Initialize(db *gorm.DB, router *gin.Engine, auth func() gin.HandlerFunc) {
+func Initialize(ctx *endpoints.Context, router *gin.Engine, auth func() gin.HandlerFunc) {
 	g := router.Group("/artworks")
 	g.Use(auth())
 	{
-		g.GET("/", endpoints.Endpoint(db, GetArtworks))
-		g.POST("/", endpoints.Endpoint(db, CreateArtwork))
-		g.GET("/:id", endpoints.Endpoint(db, GetArtwork))
-		g.PUT("/:id", endpoints.Endpoint(db, UpdateArtwork))
-		g.DELETE("/:id", endpoints.Endpoint(db, DeleteArtwork))
-		g.POST("/:id/upload", endpoints.Endpoint(db, UploadArtwork))
+		g.GET("/", endpoints.Endpoint(ctx, GetArtworks))
+		g.POST("/", endpoints.Endpoint(ctx, CreateArtwork))
+		g.GET("/:id", endpoints.Endpoint(ctx, GetArtwork))
+		g.PUT("/:id", endpoints.Endpoint(ctx, UpdateArtwork))
+		g.DELETE("/:id", endpoints.Endpoint(ctx, DeleteArtwork))
+		g.POST("/:id/upload", endpoints.Endpoint(ctx, UploadArtwork))
 	}
 }
 
 // GetArtworks gets all artworks
-func GetArtworks(c *gin.Context, db *gorm.DB) {
+func GetArtworks(c *gin.Context, ctx *endpoints.Context) {
 	claims := jwt.ExtractClaims(c)
 	var user users.User
-	db.Where("username = ?", claims["id"]).First(&user)
+	ctx.DB.Where("username = ?", claims["id"]).First(&user)
 
 	var artworks []users.Artwork
-	db.Model(&user).Related(&artworks)
+	ctx.DB.Model(&user).Related(&artworks)
 	c.JSON(http.StatusOK, artworks)
 }
 
 // GetArtwork gets all artworks; adds a view if it’s not the owner
-func GetArtwork(c *gin.Context, db *gorm.DB) {
+func GetArtwork(c *gin.Context, ctx *endpoints.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
@@ -65,7 +64,7 @@ func GetArtwork(c *gin.Context, db *gorm.DB) {
 	}
 
 	var artwork users.Artwork
-	db.First(&artwork, id)
+	ctx.DB.First(&artwork, id)
 
 	if artwork.ID == 0 {
 		c.String(http.StatusNotFound, "Invalid ID: not found")
@@ -74,17 +73,17 @@ func GetArtwork(c *gin.Context, db *gorm.DB) {
 
 	claims := jwt.ExtractClaims(c)
 	var user users.User
-	db.Where("username = ?", claims["id"]).First(&user)
+	ctx.DB.Where("username = ?", claims["id"]).First(&user)
 
 	if user.ID != artwork.UserID {
 		artwork.Views++
-		db.Save(&artwork)
+		ctx.DB.Save(&artwork)
 	}
 
 	c.JSON(http.StatusOK, artwork)
 }
 
-func createThumbnail(art *users.Artwork, db *gorm.DB) {
+func createThumbnail(art *users.Artwork, ctx *endpoints.Context) {
 	var marshalled []byte
 	var err error
 	switch art.Type {
@@ -114,9 +113,9 @@ func createThumbnail(art *users.Artwork, db *gorm.DB) {
 	var resp *http.Response
 	switch art.Type {
 	case "image":
-		resp, err = http.Post("http://127.0.0.1:8000/", "application/json", buf)
+		resp, err = http.Post(ctx.Config.ImgThumbnailer, "application/json", buf)
 	case "video":
-		resp, err = http.Post("http://127.0.0.1:8002/", "application/json", buf)
+		resp, err = http.Post(ctx.Config.VidThumbnailer, "application/json", buf)
 	case "default":
 		return
 	}
@@ -147,11 +146,11 @@ func createThumbnail(art *users.Artwork, db *gorm.DB) {
 	}
 
 	art.Thumbnail = content.URL
-	db.Save(art)
+	ctx.DB.Save(art)
 }
 
 // CreateArtwork creates an artwork
-func CreateArtwork(c *gin.Context, db *gorm.DB) {
+func CreateArtwork(c *gin.Context, ctx *endpoints.Context) {
 	var artjson ArtworkJSON
 	if err := c.ShouldBindJSON(&artjson); err != nil {
 		c.String(http.StatusBadRequest, "Invalid body: ", err.Error())
@@ -167,7 +166,7 @@ func CreateArtwork(c *gin.Context, db *gorm.DB) {
 
 	claims := jwt.ExtractClaims(c)
 	var user users.User
-	db.Where("username = ?", claims["id"]).First(&user)
+	ctx.DB.Where("username = ?", claims["id"]).First(&user)
 
 	if &user == nil {
 		c.String(http.StatusUnauthorized, "")
@@ -176,17 +175,17 @@ func CreateArtwork(c *gin.Context, db *gorm.DB) {
 
 	art.UserID = user.ID
 
-	if !db.NewRecord(art) {
+	if !ctx.DB.NewRecord(art) {
 		c.String(http.StatusBadRequest, "Artwork already present: ", string(art.ID))
 		return
 	}
 
-	db.Create(&art)
+	ctx.DB.Create(&art)
 
 	c.JSON(http.StatusOK, art)
 }
 
-func processUploadArtwork(file multipart.File, art *users.Artwork, db *gorm.DB) {
+func processUploadArtwork(file multipart.File, art *users.Artwork, ctx *endpoints.Context) {
 	var b bytes.Buffer
 	defer func() {
 		err := file.Close()
@@ -220,7 +219,7 @@ func processUploadArtwork(file multipart.File, art *users.Artwork, db *gorm.DB) 
 	}()
 
 	go func() {
-		req, err := http.NewRequest("POST", "http://localhost:8010/", &b)
+		req, err := http.NewRequest("POST", ctx.Config.Uploader, &b)
 		if err != nil {
 			log.Println("Error while uploading artwork ", art.ID,
 				": ", err)
@@ -257,14 +256,14 @@ func processUploadArtwork(file multipart.File, art *users.Artwork, db *gorm.DB) 
 		}
 
 		art.URL = content.URL
-		db.Save(art)
+		ctx.DB.Save(art)
 
-		go createThumbnail(art, db)
+		go createThumbnail(art, ctx)
 	}()
 }
 
 // UploadArtwork uploads an actual artwork to S3
-func UploadArtwork(c *gin.Context, db *gorm.DB) {
+func UploadArtwork(c *gin.Context, ctx *endpoints.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
@@ -273,7 +272,7 @@ func UploadArtwork(c *gin.Context, db *gorm.DB) {
 	}
 
 	var art users.Artwork
-	db.First(&art, id)
+	ctx.DB.First(&art, id)
 
 	if &art == nil {
 		c.String(http.StatusNotFound, "Not found")
@@ -282,7 +281,7 @@ func UploadArtwork(c *gin.Context, db *gorm.DB) {
 
 	claims := jwt.ExtractClaims(c)
 	var user users.User
-	db.Where("username = ?", claims["id"]).First(&user)
+	ctx.DB.Where("username = ?", claims["id"]).First(&user)
 
 	if user.ID != art.UserID {
 		c.String(http.StatusForbidden, "Cannot alter foreign artwork")
@@ -296,13 +295,13 @@ func UploadArtwork(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	processUploadArtwork(file, &art, db)
+	processUploadArtwork(file, &art, ctx)
 
 	c.String(http.StatusOK, "")
 }
 
 // DeleteArtwork deletes an artwork
-func DeleteArtwork(c *gin.Context, db *gorm.DB) {
+func DeleteArtwork(c *gin.Context, ctx *endpoints.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
@@ -311,7 +310,7 @@ func DeleteArtwork(c *gin.Context, db *gorm.DB) {
 	}
 
 	var art *users.Artwork
-	db.First(art, id)
+	ctx.DB.First(art, id)
 
 	if art.ID == 0 {
 		c.String(http.StatusNotFound, "Not found")
@@ -320,20 +319,20 @@ func DeleteArtwork(c *gin.Context, db *gorm.DB) {
 
 	claims := jwt.ExtractClaims(c)
 	var user users.User
-	db.Where("username = ?", claims["id"]).First(&user)
+	ctx.DB.Where("username = ?", claims["id"]).First(&user)
 
 	if user.ID != art.UserID {
 		c.String(http.StatusForbidden, "Cannot alter foreign artwork")
 		return
 	}
 
-	db.Delete(art)
+	ctx.DB.Delete(art)
 
 	c.String(http.StatusOK, "")
 }
 
 // UpdateArtwork updates an artwork
-func UpdateArtwork(c *gin.Context, db *gorm.DB) {
+func UpdateArtwork(c *gin.Context, ctx *endpoints.Context) {
 	_, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
@@ -347,21 +346,21 @@ func UpdateArtwork(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	if db.NewRecord(art) {
+	if ctx.DB.NewRecord(art) {
 		c.String(http.StatusNotFound, "Not found")
 		return
 	}
 
 	claims := jwt.ExtractClaims(c)
 	var user users.User
-	db.Where("username = ?", claims["id"]).First(&user)
+	ctx.DB.Where("username = ?", claims["id"]).First(&user)
 
 	if user.ID != art.UserID {
 		c.String(http.StatusForbidden, "Cannot alter foreign artwork")
 		return
 	}
 
-	db.Save(&art)
+	ctx.DB.Save(&art)
 
 	c.JSON(http.StatusOK, art)
 }

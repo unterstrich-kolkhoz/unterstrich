@@ -9,7 +9,6 @@ import (
 	"github.com/appleboy/gin-jwt"
 	"github.com/gin-gonic/gin"
 	"github.com/gosimple/slug"
-	"github.com/jinzhu/gorm"
 
 	"github.com/hellerve/unterstrich/endpoints"
 	"github.com/hellerve/unterstrich/model"
@@ -60,35 +59,35 @@ type CreationUser struct {
 }
 
 // Initialize initializes the URLs for users
-func Initialize(db *gorm.DB, router *gin.Engine, auth func() gin.HandlerFunc) {
-	router.POST("/users", endpoints.Endpoint(db, CreateUser))
+func Initialize(ctx *endpoints.Context, router *gin.Engine, auth func() gin.HandlerFunc) {
+	router.POST("/users", endpoints.Endpoint(ctx, CreateUser))
 	g := router.Group("/users")
 	g.Use(auth())
 	{
-		g.GET("/", endpoints.Endpoint(db, GetUsers))
-		g.GET("/:id", endpoints.Endpoint(db, GetUser))
-		g.PUT("/:id", endpoints.Endpoint(db, UpdateUser))
-		g.DELETE("/:id", endpoints.Endpoint(db, DeleteUser))
+		g.GET("/", endpoints.Endpoint(ctx, GetUsers))
+		g.GET("/:id", endpoints.Endpoint(ctx, GetUser))
+		g.PUT("/:id", endpoints.Endpoint(ctx, UpdateUser))
+		g.DELETE("/:id", endpoints.Endpoint(ctx, DeleteUser))
 	}
 
 	g = router.Group("/")
 	g.Use(auth())
 	{
-		g.GET("/me", endpoints.Endpoint(db, GetMe))
+		g.GET("/me", endpoints.Endpoint(ctx, GetMe))
 	}
 
-	db.AutoMigrate(&User{}, &Artwork{})
+	ctx.DB.AutoMigrate(&User{}, &Artwork{})
 }
 
 // GetUsers gets all users
-func GetUsers(c *gin.Context, db *gorm.DB) {
+func GetUsers(c *gin.Context, ctx *endpoints.Context) {
 	var users []User
-	db.Find(&users)
+	ctx.DB.Find(&users)
 	c.JSON(http.StatusOK, users)
 }
 
 // GetUser gets a specifc user
-func GetUser(c *gin.Context, db *gorm.DB) {
+func GetUser(c *gin.Context, ctx *endpoints.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
@@ -97,7 +96,7 @@ func GetUser(c *gin.Context, db *gorm.DB) {
 	}
 
 	var user *User
-	db.First(user, id)
+	ctx.DB.First(user, id)
 
 	if user == nil {
 		c.String(http.StatusNotFound, "Invalid ID: not found")
@@ -108,10 +107,10 @@ func GetUser(c *gin.Context, db *gorm.DB) {
 }
 
 // GetMe gets current user
-func GetMe(c *gin.Context, db *gorm.DB) {
+func GetMe(c *gin.Context, ctx *endpoints.Context) {
 	claims := jwt.ExtractClaims(c)
 	var me User
-	db.Where("username = ?", claims["id"]).First(&me)
+	ctx.DB.Where("username = ?", claims["id"]).First(&me)
 
 	c.JSON(http.StatusOK, me)
 }
@@ -126,7 +125,7 @@ func inBlacklist(username string) bool {
 }
 
 // CreateUser creates a new user
-func CreateUser(c *gin.Context, db *gorm.DB) {
+func CreateUser(c *gin.Context, ctx *endpoints.Context) {
 	var jsonuser CreationUser
 	if err := c.ShouldBindJSON(&jsonuser); err != nil {
 		c.String(http.StatusBadRequest, "Invalid body: ", err.Error())
@@ -143,7 +142,7 @@ func CreateUser(c *gin.Context, db *gorm.DB) {
 	user.Email = jsonuser.Email
 	user.Username = jsonuser.Username
 	user.Password = jsonuser.Password
-	if !db.NewRecord(user) {
+	if !ctx.DB.NewRecord(user) {
 		c.String(http.StatusBadRequest, "User already present: ", string(user.ID))
 		return
 	}
@@ -162,13 +161,13 @@ func CreateUser(c *gin.Context, db *gorm.DB) {
 
 	user.Password = string(pw)
 
-	db.Create(&user)
+	ctx.DB.Create(&user)
 
 	c.JSON(http.StatusOK, user)
 }
 
 // DeleteUser deletes a user (must be the user themselves)
-func DeleteUser(c *gin.Context, db *gorm.DB) {
+func DeleteUser(c *gin.Context, ctx *endpoints.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
@@ -177,7 +176,7 @@ func DeleteUser(c *gin.Context, db *gorm.DB) {
 	}
 
 	var user *User
-	db.First(user, id)
+	ctx.DB.First(user, id)
 
 	if user == nil {
 		c.String(http.StatusNotFound, "Not found")
@@ -186,20 +185,20 @@ func DeleteUser(c *gin.Context, db *gorm.DB) {
 
 	claims := jwt.ExtractClaims(c)
 	var me User
-	db.Where("username = ?", claims["id"]).First(&me)
+	ctx.DB.Where("username = ?", claims["id"]).First(&me)
 
 	if user.ID != me.ID {
 		c.String(http.StatusForbidden, "Cannot alter foreign user")
 		return
 	}
 
-	db.Delete(&user)
+	ctx.DB.Delete(&user)
 
 	c.String(http.StatusOK, "")
 }
 
 // UpdateUser updates a user (must be the user themselves)
-func UpdateUser(c *gin.Context, db *gorm.DB) {
+func UpdateUser(c *gin.Context, ctx *endpoints.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
@@ -213,13 +212,13 @@ func UpdateUser(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	if db.NewRecord(user) {
+	if ctx.DB.NewRecord(user) {
 		c.String(http.StatusNotFound, "Not found")
 		return
 	}
 
 	var other User
-	db.First(&other, id)
+	ctx.DB.First(&other, id)
 
 	if (user.Staff && !other.Staff) || (user.Admin && !other.Admin) {
 		c.String(http.StatusForbidden, "Cannot make user admin")
@@ -228,7 +227,7 @@ func UpdateUser(c *gin.Context, db *gorm.DB) {
 
 	claims := jwt.ExtractClaims(c)
 	var me User
-	db.Where("username = ?", claims["id"]).First(&me)
+	ctx.DB.Where("username = ?", claims["id"]).First(&me)
 
 	if user.ID != me.ID {
 		c.String(http.StatusForbidden, "Cannot alter foreign user")
@@ -248,7 +247,7 @@ func UpdateUser(c *gin.Context, db *gorm.DB) {
 		user.Password = string(pw)
 	}
 
-	db.Save(&user)
+	ctx.DB.Save(&user)
 
 	c.JSON(http.StatusOK, user)
 }

@@ -2,11 +2,17 @@ package endpoints
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/hellerve/unterstrich/config"
 	"github.com/jinzhu/gorm"
 )
 
-func Endpoint(db *gorm.DB, wrapped func(*gin.Context, *gorm.DB)) func(*gin.Context) {
+type Context struct {
+	DB     *gorm.DB
+	Config *config.Config
+}
+
+func Endpoint(ctx *Context, wrapped func(*gin.Context, *Context)) func(*gin.Context) {
 	return func(c *gin.Context) {
-		wrapped(c, db)
+		wrapped(c, ctx)
 	}
 }

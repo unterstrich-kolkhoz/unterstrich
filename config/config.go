@@ -11,10 +11,15 @@ import (
 
 // Config is our global configuration object
 type Config struct {
-	Port       string
-	Staticdir  string `toml:"static_dir"`
-	SQLDialect string `toml:"sql_dialect"`
-	SQLName    string `toml:"db_name"`
+	Port              string
+	Staticdir         string `toml:"static_dir"`
+	Uploader          string
+	ImgThumbnailer    string `toml:"img_thumbnailer"`
+	VidThumbnailer    string `toml:"vid_thumbnailer"`
+	ShaderThumbnailer string `toml:"shader_thumbnailer"`
+	TemplateDir       string `toml:"template_dir"`
+	SQLDialect        string `toml:"sql_dialect"`
+	SQLName           string `toml:"db_name"`
 }
 
 // ReadConfig is the main entry point for configuration
