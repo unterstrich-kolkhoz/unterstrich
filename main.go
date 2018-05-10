@@ -6,13 +6,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/hellerve/unterstrich/artworks"
-	"github.com/hellerve/unterstrich/config"
-	"github.com/hellerve/unterstrich/db"
-	"github.com/hellerve/unterstrich/endpoints"
-	"github.com/hellerve/unterstrich/static"
-	"github.com/hellerve/unterstrich/subsite"
-	"github.com/hellerve/unterstrich/users"
+	"github.com/unterstrich-kolkhoz/unterstrich/artworks"
+	"github.com/unterstrich-kolkhoz/unterstrich/config"
+	"github.com/unterstrich-kolkhoz/unterstrich/db"
+	"github.com/unterstrich-kolkhoz/unterstrich/endpoints"
+	"github.com/unterstrich-kolkhoz/unterstrich/static"
+	"github.com/unterstrich-kolkhoz/unterstrich/subsite"
+	"github.com/unterstrich-kolkhoz/unterstrich/users"
 )
 
 func main() {

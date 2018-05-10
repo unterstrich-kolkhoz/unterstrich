@@ -15,8 +15,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/hoisie/mustache"
 
-	"github.com/hellerve/unterstrich/endpoints"
-	"github.com/hellerve/unterstrich/users"
+	"github.com/unterstrich-kolkhoz/unterstrich/endpoints"
+	"github.com/unterstrich-kolkhoz/unterstrich/users"
 )
 
 // Initialize initializes the subsite router context

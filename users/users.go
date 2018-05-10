@@ -10,8 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gosimple/slug"
 
-	"github.com/hellerve/unterstrich/endpoints"
-	"github.com/hellerve/unterstrich/model"
+	"github.com/unterstrich-kolkhoz/unterstrich/endpoints"
+	"github.com/unterstrich-kolkhoz/unterstrich/model"
 )
 
 // Artwork is the artwork model

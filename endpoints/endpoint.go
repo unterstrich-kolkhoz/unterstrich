@@ -2,7 +2,7 @@ package endpoints
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/hellerve/unterstrich/config"
+	"github.com/unterstrich-kolkhoz/unterstrich/config"
 	"github.com/jinzhu/gorm"
 )
 
