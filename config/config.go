@@ -20,6 +20,7 @@ type Config struct {
 	TemplateDir       string `toml:"template_dir"`
 	SQLDialect        string `toml:"sql_dialect"`
 	SQLName           string `toml:"db_name"`
+	Region            string `toml:"region"`
 }
 
 // ReadConfig is the main entry point for configuration

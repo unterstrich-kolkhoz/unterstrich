@@ -4,8 +4,14 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/user"
 
 	"github.com/appleboy/gin-jwt"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/gin-gonic/gin"
 	"github.com/hoisie/mustache"
 
@@ -22,11 +28,64 @@ func Initialize(ctx *endpoints.Context, router *gin.Engine, auth func() gin.Hand
 	}
 }
 
-func uploadFiles(username string, files []string) {
-	// create S3 bucket for user if necessary
+//var readGrant = "uri=\"http://acs.amazonaws.com/groups/global/AllUsers\""
+
+func uploadFiles(ctx *endpoints.Context, username string, files []string) {
+	usr, err := user.Current()
+	if err != nil {
+		log.Println("Error during subsite creation, could not get current user")
+		return
+	}
+
+	dir := usr.HomeDir
+	sess, err := session.NewSession(&aws.Config{
+		Region:      aws.String(ctx.Config.Region),
+		Credentials: credentials.NewSharedCredentials(dir+"/.aws/credentials", "unterstrich"),
+	})
+
+	if err != nil {
+		log.Println("Error during subsite creation, could not authenticate to S3")
+		return
+	}
+
+	s3manage := s3.New(sess)
+	bucketName := "unterstrich-" + username
+	bucketInput := s3.CreateBucketInput{Bucket: &bucketName}
+	// TODO: read grant permissions
+	//_, err = s3manage.CreateBucket(bucketInput.SetGrantReadACP(readGrant))
+	_, err = s3manage.CreateBucket(&bucketInput)
+
+	if err != nil {
+		log.Println("Error during subsite creation, could not create bucket. ", err)
+		return
+	}
+
+	// create A record if necessary
 	for _, file := range files {
-		// upload file to S3 bucket
-		err := os.Remove(file)
+
+		uploader := s3manager.NewUploader(sess)
+
+		f, err := os.Open(file)
+
+		if err != nil {
+			log.Println("Error during subsite creation (while opening file", file,
+				"): ", err)
+			continue
+		}
+
+		_, err = uploader.Upload(&s3manager.UploadInput{
+			Bucket: aws.String(bucketName),
+			Key:    aws.String(file),
+			Body:   f,
+		})
+
+		if err != nil {
+			log.Println("Error during subsite creation (while uploading file", file,
+				"): ", err)
+			continue
+		}
+
+		err = os.Remove(file)
 		if err != nil {
 			log.Println("Error during subsite creation (while deleting file", file,
 				"): ", err)
@@ -90,7 +149,7 @@ func processUpdate(ctx *endpoints.Context, username string) {
 			return
 		}
 	}
-	uploadFiles(username, files)
+	uploadFiles(ctx, username, files)
 }
 
 // UpdateSubsite updates the user subsite
