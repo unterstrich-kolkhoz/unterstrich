@@ -8,6 +8,7 @@ import (
 
 	"github.com/appleboy/gin-jwt"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -28,8 +29,6 @@ func Initialize(ctx *endpoints.Context, router *gin.Engine, auth func() gin.Hand
 	}
 }
 
-//var readGrant = "uri=\"http://acs.amazonaws.com/groups/global/AllUsers\""
-
 func uploadFiles(ctx *endpoints.Context, username string, files []string) {
 	usr, err := user.Current()
 	if err != nil {
@@ -49,14 +48,49 @@ func uploadFiles(ctx *endpoints.Context, username string, files []string) {
 	}
 
 	s3manage := s3.New(sess)
-	bucketName := "unterstrich-" + username
+	bucketName := username + "." + ctx.Config.URL
 	bucketInput := s3.CreateBucketInput{Bucket: &bucketName}
-	// TODO: read grant permissions
-	//_, err = s3manage.CreateBucket(bucketInput.SetGrantReadACP(readGrant))
 	_, err = s3manage.CreateBucket(&bucketInput)
 
-	if err != nil {
+	if err != nil && err.(awserr.Error).Code() != s3.ErrCodeBucketAlreadyOwnedByYou {
 		log.Println("Error during subsite creation, could not create bucket. ", err)
+		return
+	}
+
+  // TODO: make me pretty
+  policyInput := s3.PutBucketPolicyInput{
+    Bucket: &bucketName,
+    Policy: aws.String(`{
+      "Version": "2012-10-17",
+      "Statement": [
+          {
+              "Sid":"AddPerm",
+              "Effect":"Allow",
+              "Principal": "*",
+              "Action":["s3:GetObject"],
+              "Resource": "arn:aws:s3:::`+bucketName+`/*"
+          }
+      ]
+    }`),
+  }
+  _, err = s3manage.PutBucketPolicy(&policyInput)
+	if err != nil {
+		log.Println("Error during subsite creation, could not create bucket policy. ", err)
+		return
+	}
+
+  webconf := s3.WebsiteConfiguration{
+    IndexDocument: &s3.IndexDocument{
+          Suffix: aws.String("index.html"),
+    },
+  }
+  webinp := s3.PutBucketWebsiteInput{
+    Bucket: &bucketName,
+    WebsiteConfiguration: &webconf,
+  }
+  _, err = s3manage.PutBucketWebsite(&webinp)
+	if err != nil {
+		log.Println("Error during subsite creation, could not make bucket website. ", err)
 		return
 	}
 
@@ -76,6 +110,7 @@ func uploadFiles(ctx *endpoints.Context, username string, files []string) {
 		_, err = uploader.Upload(&s3manager.UploadInput{
 			Bucket: aws.String(bucketName),
 			Key:    aws.String(file),
+      ContentType: aws.String("text/html"),
 			Body:   f,
 		})
 
@@ -99,10 +134,10 @@ func processUpdate(ctx *endpoints.Context, username string) {
 	var files []string
 
 	var artworks []users.Artwork
-	ctx.DB.Model(&user).Where("selected = ?", true).Related(&artworks)
+	ctx.DB.Model(&user).Related(&artworks)
 	data := mustache.RenderFile(ctx.Config.TemplateDir+"/subsite.html", map[string]interface{}{"user": user, "artworks": artworks})
 
-	f, err := os.Create(username + ".html")
+	f, err := os.Create("index.html")
 	if err != nil {
 		log.Println("Error during subsite creation: ", err)
 		return
