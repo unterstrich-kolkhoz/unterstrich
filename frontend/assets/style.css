@@ -1,6 +1,7 @@
+@import url('https://fonts.googleapis.com/css?family=IBM+Plex+Mono:400,600&subset=cyrillic,cyrillic-ext,latin-ext,vietnamese');
 body {
   background: #fefefe;
-  font-family: monospace;
+  font-family: 'IBM Plex Mono', monospace;
   margin: 0;
 }
 
@@ -53,7 +54,7 @@ button  {
   border-bottom: 3px solid #000;
   font-size: 20px;
   display: block;
-  font-family: monospace;
+  font-family: 'IBM Plex Mono', monospace;
   margin-bottom: 0.5em;
   padding-left: 0;
   padding-right: 0;
@@ -153,7 +154,7 @@ label {
   border: 3px solid;
   background: #fff;
   width: 600px;
-  height: 120px;
+  min-height: 120px;
   padding: 1em;
   margin-left: 100px;
 }

@@ -153,7 +153,7 @@ func processUpdate(ctx *endpoints.Context, username string) {
 
 	data = mustache.RenderFile(ctx.Config.TemplateDir+"/subsite_about.html", map[string]interface{}{"user": user})
 
-	f, err = os.Create(username + "_about.html")
+	f, err = os.Create("about.html")
 	if err != nil {
 		log.Println("Error during subsite creation: ", err)
 		return
@@ -170,7 +170,7 @@ func processUpdate(ctx *endpoints.Context, username string) {
 	for _, artwork := range artworks {
 		data = mustache.RenderFile(ctx.Config.TemplateDir+"/subsite_artwork.html", map[string]interface{}{"user": user, "artwork": artwork})
 
-		f, err = os.Create(username + "_" + artwork.Slug() + ".html")
+		f, err = os.Create(artwork.Slug() + ".html")
 		files = append(files, f.Name())
 		if err != nil {
 			log.Println("Error during subsite creation: ", err)
