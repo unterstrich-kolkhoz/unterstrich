@@ -13,16 +13,21 @@ verweisen wir auf die Definitionen im Art. 4 der Datenschutzgrundverordnung
 
 Verantwortlicher
 
-Veit Heller Spreestr. 26 12439 Berlin Germany
+Veit Heller
+Spreestr. 26
+12439 Berlin
+Germany
 
-Auch erreichbar via e-mail: veit@veitheller.de<br> Impressum unter:
-http://unterstrich.io/imprint.txt
+Auch erreichbar via e-mail: veit@veitheller.de
 
-Arten der verarbeiteten Daten: -	Bestandsdaten (z.B., Namen, Adressen).  -
-Kontaktdaten (z.B., E-Mail, Telefonnummern).  -	Inhaltsdaten (z.B.,
-Texteingaben, Fotografien, Videos).  -	Nutzungsdaten (z.B., besuchte Webseiten,
-Interesse an Inhalten, Zugriffszeiten).  -	Meta-/Kommunikationsdaten (z.B.,
-Geräte-Informationen, IP-Adressen).
+Impressum unter: http://unterstrich.io/imprint.txt
+
+Arten der verarbeiteten Daten:
+- Bestandsdaten, z.B. Namen, Adressen
+- Kontaktdaten, z.B. E-Mail, Telefonnummern
+- Inhaltsdaten, z.B. Texteingaben, Fotografien, Videos)
+- Nutzungsdaten, z.B., besuchte Webseiten, Interesse an Inhalten, Zugriffszeiten
+- Meta-/Kommunikationsdaten, z.B. Geräte-Informationen, IP-Adressen
 
 Kategorien betroffener Personen
 
@@ -31,9 +36,10 @@ betroffenen Personen zusammenfassend auch als „Nutzer“).
 
 Zweck der Verarbeitung
 
--	Zurverfügungstellung des Onlineangebotes, seiner Funktionen und  Inhalte.  -
-Beantwortung von Kontaktanfragen und Kommunikation mit Nutzern.  -
-Sicherheitsmaßnahmen.  -	Reichweitenmessung/Marketing
+- Zurverfügungstellung des Onlineangebotes, seiner Funktionen und Inhalte.
+- Beantwortung von Kontaktanfragen und Kommunikation mit Nutzern.
+- Sicherheitsmaßnahmen.
+- Reichweitenmessung/Marketing
 
 Verwendete Begrifflichkeiten
 
@@ -245,11 +251,11 @@ wird.
 
 Geschäftsbezogene Verarbeitung
 
-Zusätzlich verarbeiten wir -	Vertragsdaten (z.B., Vertragsgegenstand, Laufzeit,
-Kundenkategorie).  -	Zahlungsdaten (z.B., Bankverbindung, Zahlungshistorie) von
-unseren Kunden, Interessenten und Geschäftspartner zwecks Erbringung
-vertraglicher Leistungen, Service und Kundenpflege, Marketing, Werbung und
-Marktforschung.
+Zusätzlich verarbeiten wir
+- Vertragsdaten (z.B., Vertragsgegenstand, Laufzeit, Kundenkategorie).
+- Zahlungsdaten (z.B., Bankverbindung, Zahlungshistorie) von unseren Kunden,
+  Interessenten und Geschäftspartner zwecks Erbringung vertraglicher
+  Leistungen, Service und Kundenpflege, Marketing, Werbung und Marktforschung.
 
 Bestellabwicklung im Onlineshop und Kundenkonto
 
