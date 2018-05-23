@@ -5,7 +5,7 @@
   "main": "client.js",
   "scripts": {
     "start": "bankai start client.js",
-    "build:prod": "bankai build client.js dist/ && cp -r dist .. && rm -r dist && LC_ALL=C sed -E -i '' -e 's/(href|src)=\"/\\1=\"\\/static/g' ../dist/index.html"
+    "build:prod": "bankai build client.js dist/ && cp -r dist .. && rm -r dist && LC_ALL=C sed -E -i '' -e 's/(href|src)=\"/\\1=\"\\/static/g' ../dist/index.html && cp assets/*.txt ../dist"
   },
   "keywords": [],
   "author": "",

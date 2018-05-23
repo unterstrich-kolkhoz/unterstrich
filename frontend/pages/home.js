@@ -20,6 +20,9 @@ module.exports = function(state, emit) {
         We are also <a href="https://github.com/unterstrich-kolkhoz">completely
         open source</a>, if that’s your thing.
       </p>
+      <p>
+        Read our <a href="https://github.com/unterstrich-kolkhoz/manifesto">manifesto</a>, <a href="/static/imprint.txt" target="_blank" rel="noopener noreferrer">imprint</a>, or <a href="/static/gdpr.txt" target="_blank" rel="noopener noreferrer">GDPR info</a>.
+      </p>
     </div>
   `);
 
