@@ -1,6 +1,7 @@
 package users
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -255,6 +256,16 @@ func UpdateUser(c *gin.Context, ctx *endpoints.Context) {
 // Slug generates a slug from the artwork name
 func (a Artwork) Slug() string {
 	return slug.Make(a.Name)
+}
+
+// PriceFormat generates the formatted string for prices
+func (a Artwork) PriceFormat() string {
+	return fmt.Sprintf("%.2f", a.Price)
+}
+
+// PriceCents generates the price in cents
+func (a Artwork) PriceCents() string {
+	return fmt.Sprintf("%d", a.Price*100)
 }
 
 // HasAddress checks whether a user has an address

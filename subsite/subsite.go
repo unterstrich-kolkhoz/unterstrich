@@ -11,11 +11,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/gin-gonic/gin"
 	"github.com/hoisie/mustache"
 
+	"github.com/unterstrich-kolkhoz/unterstrich/config"
 	"github.com/unterstrich-kolkhoz/unterstrich/endpoints"
 	"github.com/unterstrich-kolkhoz/unterstrich/users"
 )
@@ -27,6 +29,36 @@ func Initialize(ctx *endpoints.Context, router *gin.Engine, auth func() gin.Hand
 	{
 		g.POST("/", endpoints.Endpoint(ctx, UpdateSubsite))
 	}
+}
+
+func createRecordSet(sess *session.Session, conf *config.Config, username string) error {
+	svc := route53.New(sess)
+	params := &route53.ChangeResourceRecordSetsInput{
+		ChangeBatch: &route53.ChangeBatch{
+			Changes: []*route53.Change{
+				{
+					Action: aws.String("CREATE"),
+					ResourceRecordSet: &route53.ResourceRecordSet{
+						AliasTarget: &route53.AliasTarget{
+							EvaluateTargetHealth: aws.Bool(false),
+							HostedZoneId:         aws.String(conf.S3HostedZoneID),
+							DNSName:              aws.String(conf.S3URL),
+						},
+						Name:          aws.String(username + "." + conf.URL),
+						Type:          aws.String("A"),
+					},
+				},
+			},
+			Comment: aws.String(username + "-creation"),
+		},
+		HostedZoneId: aws.String(conf.HostedZoneID),
+	}
+	_, err := svc.ChangeResourceRecordSets(params)
+  // A record exists already
+  if aerr, ok := err.(awserr.Error); ok && aerr.Code() == route53.ErrCodeInvalidChangeBatch {
+    return nil
+  }
+	return err
 }
 
 func uploadFiles(ctx *endpoints.Context, username string, files []string) {
@@ -57,10 +89,10 @@ func uploadFiles(ctx *endpoints.Context, username string, files []string) {
 		return
 	}
 
-  // TODO: make me pretty
-  policyInput := s3.PutBucketPolicyInput{
-    Bucket: &bucketName,
-    Policy: aws.String(`{
+	// TODO: make me pretty
+	policyInput := s3.PutBucketPolicyInput{
+		Bucket: &bucketName,
+		Policy: aws.String(`{
       "Version": "2012-10-17",
       "Statement": [
           {
@@ -68,37 +100,43 @@ func uploadFiles(ctx *endpoints.Context, username string, files []string) {
               "Effect":"Allow",
               "Principal": "*",
               "Action":["s3:GetObject"],
-              "Resource": "arn:aws:s3:::`+bucketName+`/*"
+              "Resource": "arn:aws:s3:::` + bucketName + `/*"
           }
       ]
     }`),
-  }
-  _, err = s3manage.PutBucketPolicy(&policyInput)
+	}
+	_, err = s3manage.PutBucketPolicy(&policyInput)
 	if err != nil {
 		log.Println("Error during subsite creation, could not create bucket policy. ", err)
 		return
 	}
 
-  webconf := s3.WebsiteConfiguration{
-    IndexDocument: &s3.IndexDocument{
-          Suffix: aws.String("index.html"),
-    },
-  }
-  webinp := s3.PutBucketWebsiteInput{
-    Bucket: &bucketName,
-    WebsiteConfiguration: &webconf,
-  }
-  _, err = s3manage.PutBucketWebsite(&webinp)
+	webconf := s3.WebsiteConfiguration{
+		IndexDocument: &s3.IndexDocument{
+			Suffix: aws.String("index.html"),
+		},
+	}
+	webinp := s3.PutBucketWebsiteInput{
+		Bucket:               &bucketName,
+		WebsiteConfiguration: &webconf,
+	}
+	_, err = s3manage.PutBucketWebsite(&webinp)
 	if err != nil {
 		log.Println("Error during subsite creation, could not make bucket website. ", err)
 		return
 	}
 
+	uploader := s3manager.NewUploader(sess)
+
 	// create A record if necessary
+	err = createRecordSet(sess, ctx.Config, username)
+
+	if err != nil {
+		log.Println("Error during subsite creation, could not create A record. ", err)
+		return
+	}
+
 	for _, file := range files {
-
-		uploader := s3manager.NewUploader(sess)
-
 		f, err := os.Open(file)
 
 		if err != nil {
@@ -108,10 +146,10 @@ func uploadFiles(ctx *endpoints.Context, username string, files []string) {
 		}
 
 		_, err = uploader.Upload(&s3manager.UploadInput{
-			Bucket: aws.String(bucketName),
-			Key:    aws.String(file),
-      ContentType: aws.String("text/html"),
-			Body:   f,
+			Bucket:      aws.String(bucketName),
+			Key:         aws.String(file),
+			ContentType: aws.String("text/html"),
+			Body:        f,
 		})
 
 		if err != nil {
@@ -125,6 +163,18 @@ func uploadFiles(ctx *endpoints.Context, username string, files []string) {
 			log.Println("Error during subsite creation (while deleting file", file,
 				"): ", err)
 		}
+	}
+
+	f, err := os.Open("templates/logo.png")
+	_, err = uploader.Upload(&s3manager.UploadInput{
+		Bucket:      aws.String(bucketName),
+		Key:         aws.String("logo.png"),
+		ContentType: aws.String("image/png"),
+		Body:        f,
+	})
+
+	if err != nil {
+		log.Println("Error during subsite creation (while uploading logo): ", err)
 	}
 }
 
@@ -168,7 +218,7 @@ func processUpdate(ctx *endpoints.Context, username string) {
 	}
 
 	for _, artwork := range artworks {
-		data = mustache.RenderFile(ctx.Config.TemplateDir+"/subsite_artwork.html", map[string]interface{}{"user": user, "artwork": artwork})
+		data = mustache.RenderFile(ctx.Config.TemplateDir+"/subsite_artwork.html", map[string]interface{}{"user": user, "artwork": artwork, "StripeKey": ctx.Config.StripeKey})
 
 		f, err = os.Create(artwork.Slug() + ".html")
 		files = append(files, f.Name())

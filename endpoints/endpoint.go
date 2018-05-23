@@ -2,8 +2,8 @@ package endpoints
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/unterstrich-kolkhoz/unterstrich/config"
 	"github.com/jinzhu/gorm"
+	"github.com/unterstrich-kolkhoz/unterstrich/config"
 )
 
 type Context struct {

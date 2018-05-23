@@ -20,8 +20,12 @@ type Config struct {
 	TemplateDir       string `toml:"template_dir"`
 	SQLDialect        string `toml:"sql_dialect"`
 	SQLName           string `toml:"db_name"`
+	StripeKey         string `toml:"stripe_key"`
 	Region            string `toml:"region"`
 	URL               string `toml:"url"`
+	HostedZoneID      string `toml:"hosted_zone_id"`
+	S3HostedZoneID    string `toml:"s3_hosted_zone_id"`
+	S3URL             string `toml:"s3_url"`
 }
 
 // ReadConfig is the main entry point for configuration
